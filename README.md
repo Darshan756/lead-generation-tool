@@ -9,6 +9,8 @@ Together they tell you which leads deserve attention and let one list travel fro
 
 > **Work sample — evaluation only.** This repository is shared for review as part of a hiring process. It is not open source; see [LICENSE](LICENSE). All company and contact data is synthetic.
 
+**Demo video (2 minutes):** https://youtu.be/uQjqiWjVg1E
+
 ![Find Leads](docs/1-find-leads.png)
 
 ## The idea
