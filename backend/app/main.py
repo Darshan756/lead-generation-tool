@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api.routes import leads
+from app.api.routes import leads, snapshots
 from app.core.config import get_settings
 from app.errors import DomainError
 
@@ -31,3 +31,4 @@ def health() -> dict[str, str]:
 
 
 app.include_router(leads.router, prefix="/api")
+app.include_router(snapshots.router, prefix="/api")
