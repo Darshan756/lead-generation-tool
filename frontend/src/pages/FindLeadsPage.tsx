@@ -1,4 +1,4 @@
-import { Camera, Download, SearchX, Target, Upload, X } from 'lucide-react'
+import { Camera, Download, Import, SearchX, Target, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CreateSnapshotDialog } from '../components/leads/CreateSnapshotDialog'
@@ -101,7 +101,7 @@ export function FindLeadsPage() {
         description="Search one or more business categories, narrow the results, then save them as a snapshot to enrich and contact."
         actions={
           <>
-            <Button icon={<Upload className="size-3.5" aria-hidden />} onClick={() => setImportOpen(true)}>
+            <Button icon={<Import className="size-3.5" aria-hidden />} onClick={() => setImportOpen(true)}>
               Import leads
             </Button>
             <Button icon={<Target className="size-3.5" aria-hidden />} onClick={() => setProfileOpen(true)}>
