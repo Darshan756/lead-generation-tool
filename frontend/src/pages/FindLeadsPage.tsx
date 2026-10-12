@@ -245,8 +245,8 @@ export function FindLeadsPage() {
         onCreated={(snapshot) => {
           setSnapshotIds(null)
           setSelected(new Set())
-          toast.success(`Saved “${snapshot.name}” with ${plural(snapshot.lead_count, 'lead')}.`)
-          navigate(`/snapshots/${snapshot.id}`)
+          toast.success(`Saved “${snapshot.name}” with ${plural(snapshot.lead_count, 'lead')}. Next: enrich it.`)
+          navigate(`/enrichment/${snapshot.id}`)
         }}
       />
 

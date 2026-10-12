@@ -1,4 +1,4 @@
-import { useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
+import { useId, type InputHTMLAttributes, type ReactNode, type Ref, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
 import { cn } from '../../lib/cn'
 
 const CONTROL =
@@ -55,11 +55,12 @@ export function TextField({ label, hint, error, optional, className, ...rest }: 
   )
 }
 
-export function TextArea({ label, hint, error, optional, className, ...rest }: Shared & TextareaHTMLAttributes<HTMLTextAreaElement>) {
+export function TextArea({ label, hint, error, optional, className, ref, ...rest }: Shared & TextareaHTMLAttributes<HTMLTextAreaElement> & { ref?: Ref<HTMLTextAreaElement> }) {
   return (
     <FieldShell label={label} hint={hint} error={error} optional={optional}>
       {({ id, describedBy }) => (
         <textarea
+          ref={ref}
           id={id}
           aria-describedby={describedBy}
           aria-invalid={error ? true : undefined}
