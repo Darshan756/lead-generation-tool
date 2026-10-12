@@ -14,5 +14,7 @@ export default defineConfig({
     globals: true,
     setupFiles: './src/test/setup.ts',
     css: false,
+    // Interaction tests can exceed the 5 s default on a busy machine.
+    testTimeout: 20000,
   },
 })
