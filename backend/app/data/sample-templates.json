@@ -1,17 +1,17 @@
 [
   {
     "name": "Intro — quick question",
-    "subject": "Quick question for {{company_name}}",
-    "body": "Hi {{owner_first_name}},\n\nI came across {{company_name}} while researching {{industry}} companies in {{location}}.\n\nWe help teams like yours spend less time finding qualified customers. Would you be open to a 15-minute call next week to see whether it is relevant for you?\n\nBest regards,\n[Your name]"
+    "subject": "Quick question for {{company}}",
+    "body": "Hi {{contact_first_name}},\n\nI came across {{company}} while researching {{category}} companies in {{location}}.\n\nWe help teams like yours spend less time finding qualified customers. Would you be open to a 15-minute call next week to see whether it is relevant for you?\n\nBest regards,\n[Your name]"
   },
   {
     "name": "Value-led introduction",
-    "subject": "An idea for {{company_name}}",
-    "body": "Hi {{owner_first_name}},\n\nI was looking at {{website}} and wanted to reach out.\n\nMany {{industry}} businesses in {{location}} tell us that keeping a steady pipeline is their hardest problem. I have a short idea that might help {{company_name}} — may I send it over?\n\nThanks,\n[Your name]"
+    "subject": "An idea for {{company}}",
+    "body": "Hi {{contact_first_name}},\n\nI was looking at {{website}} and wanted to reach out.\n\nMany {{category}} businesses in {{location}} tell us that keeping a steady pipeline is their hardest problem. I have a short idea that might help {{company}} — may I send it over?\n\nThanks,\n[Your name]"
   },
   {
     "name": "Short follow-up",
-    "subject": "Following up — {{company_name}}",
-    "body": "Hi {{owner_first_name}},\n\nJust following up on my earlier note. If growing {{company_name}}'s customer base is a priority this quarter, I would be glad to share how we could help.\n\nIf now is not the right time, no problem at all.\n\nBest,\n[Your name]"
+    "subject": "Following up — {{company}}",
+    "body": "Hi {{contact_first_name}},\n\nJust following up on my earlier note. If growing {{company}}'s customer base is a priority this quarter, I would be glad to share how we could help.\n\nIf now is not the right time, no problem at all.\n\nBest,\n[Your name]"
   }
 ]

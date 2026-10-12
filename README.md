@@ -147,7 +147,7 @@ npm run dev                                # http://localhost:5173
 ## Tests
 
 ```bash
-cd backend && pytest          # 87 tests, run against PostgreSQL
+cd backend && pytest          # 88 tests, run against PostgreSQL
 cd frontend && npm test       # 52 tests
 cd frontend && npm run lint && npm run build
 ```

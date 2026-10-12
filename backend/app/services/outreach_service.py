@@ -18,14 +18,25 @@ _VARIABLE_RE = re.compile(r"\{\{\s*([A-Za-z_][A-Za-z0-9_]*)\s*\}\}")
 # Anything brace-wrapped that survives substitution (e.g. "{{ }}", "{{a b}}").
 _LEFTOVER_RE = re.compile(r"\{\{.*?\}\}", re.DOTALL)
 
+# Variable names match the column names shown in the lead tables.
 # name -> (description, fallback used when the record has no value)
 VARIABLES: dict[str, tuple[str, str]] = {
-    "company_name": ("Company name", "your company"),
-    "industry": ("Industry", "your industry"),
-    "location": ("City and state", "your area"),
+    "company": ("Company name", "your company"),
+    "category": ("Category (industry)", "your industry"),
+    "city": ("City", "your city"),
+    "state": ("State", "your state"),
+    "location": ("City and state together", "your area"),
     "website": ("Website domain", "your website"),
-    "owner_name": ("Contact's full name", "there"),
-    "owner_first_name": ("Contact's first name", "there"),
+    "contact_name": ("Contact's full name", "there"),
+    "contact_first_name": ("Contact's first name", "there"),
+}
+
+# Earlier names, still accepted so existing templates keep working.
+ALIASES: dict[str, str] = {
+    "company_name": "company",
+    "industry": "category",
+    "owner_name": "contact_name",
+    "owner_first_name": "contact_first_name",
 }
 
 SKIP_REASONS = {
@@ -38,12 +49,14 @@ def _values(data: dict[str, Any]) -> dict[str, str | None]:
     owner = clean(data.get("owner_name"))
     city, state = clean(data.get("city")), clean(data.get("state"))
     return {
-        "company_name": clean(data.get("company_name")),
-        "industry": clean(data.get("industry")),
+        "company": clean(data.get("company_name")),
+        "category": clean(data.get("industry")),
+        "city": city,
+        "state": state,
         "location": ", ".join(part for part in (city, state) if part) or None,
         "website": clean(data.get("domain")) or clean(data.get("website")),
-        "owner_name": owner,
-        "owner_first_name": owner.split()[0] if owner else None,
+        "contact_name": owner,
+        "contact_first_name": owner.split()[0] if owner else None,
     }
 
 
@@ -60,6 +73,7 @@ def render(text: str, data: dict[str, Any]) -> tuple[str, list[str], list[str]]:
 
     def substitute(match: re.Match[str]) -> str:
         name = match.group(1).lower()
+        name = ALIASES.get(name, name)
         if name not in VARIABLES:
             if name not in unknown:
                 unknown.append(name)

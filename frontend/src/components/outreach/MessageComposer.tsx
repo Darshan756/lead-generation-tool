@@ -108,7 +108,7 @@ export function MessageComposer({ templates, variables, message, previewLead, on
           onChange={(event) => onChange({ ...message, body: event.target.value })}
         />
         <div>
-          <p className="mb-1.5 text-xs font-medium text-slate-700">Insert a variable</p>
+          <p className="mb-1.5 text-xs font-medium text-slate-700">Insert a column from the lead list</p>
           <div className="flex flex-wrap gap-1.5">
             {variables.map((variable) => (
               <button

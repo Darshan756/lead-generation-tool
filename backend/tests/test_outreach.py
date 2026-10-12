@@ -7,8 +7,8 @@ from app.models import OutreachTemplate
 from app.services.outreach_service import render
 
 DELTA = "Delta, Unknown \"Co\""
-SUBJECT = "Quick question for {{company_name}}"
-BODY = "Hi {{owner_first_name}},\n\nI saw {{website}} — {{industry}} in {{location}}.\n\nBest"
+SUBJECT = "Quick question for {{company}}"
+BODY = "Hi {{contact_first_name}},\n\nI saw {{website}} — {{category}} in {{location}}.\n\nBest"
 
 FULL = {
     "company_name": "Alpha Software", "industry": "Software Development", "city": "San Diego", "state": "CA",
@@ -28,7 +28,7 @@ def test_render_substitutes_known_values():
 def test_render_uses_neutral_fallbacks_and_never_invents_a_name():
     text, fallbacks, _ = render(BODY, {"company_name": "Delta"})
     assert text == "Hi there,\n\nI saw your website — your industry in your area.\n\nBest"
-    assert fallbacks == ["owner_first_name", "website", "industry", "location"]
+    assert fallbacks == ["contact_first_name", "website", "category", "location"]
 
 
 def test_render_never_leaves_unresolved_variables():
@@ -38,8 +38,17 @@ def test_render_never_leaves_unresolved_variables():
     assert unknown == ["ceo_salary"]
 
 
+def test_earlier_variable_names_still_work_and_report_the_current_name():
+    text, fallbacks, unknown = render("{{company_name}} / {{industry}} / {{owner_name}} / {{owner_first_name}}", FULL)
+    assert text == "Alpha Software / Software Development / Avery Whitlock / Avery"
+    assert unknown == []
+    assert render("Hi {{owner_first_name}}", {"company_name": "Delta"})[1] == ["contact_first_name"]
+
+
 def test_render_handles_whitespace_and_partial_location():
-    assert render("{{  company_name  }}", FULL)[0] == "Alpha Software"
+    assert render("{{  company  }}", FULL)[0] == "Alpha Software"
+    assert render("{{city}} / {{state}}", FULL)[0] == "San Diego / CA"
+    assert render("{{contact_name}}", FULL)[0] == "Avery Whitlock"
     assert render("{{location}}", {"company_name": "x", "state": "TX"})[0] == "TX"
     assert render("Hi {{nope}} , welcome", FULL)[0] == "Hi, welcome"
 
@@ -154,7 +163,7 @@ def test_preview_does_not_create_a_draft(client, ids):
     assert body["subject"] == "Quick question for Bravo Labs"
     assert body["body"].startswith("Hi there,")
     assert body["to_email"] is None
-    assert "owner_first_name" in body["fallbacks_used"]
+    assert "contact_first_name" in body["fallbacks_used"]
     assert client.get("/api/outreach/drafts").json() == []
     assert client.post("/api/outreach/preview", json={"snapshot_lead_id": 99999, "subject": "a", "body": "b"}).status_code == 404
 
@@ -171,7 +180,9 @@ def test_templates_can_be_listed_created_and_edited(client, db):
     assert updated.json()["subject"] == "New"
     assert client.put(f"/api/outreach/templates/{template_id}", json={"name": "Intro", "subject": "x", "body": "y"}).status_code == 409
     assert client.put("/api/outreach/templates/99999", json={"name": "Z", "subject": "x", "body": "y"}).status_code == 404
-    assert {v["name"] for v in client.get("/api/outreach/variables").json()} >= {"company_name", "industry", "location", "website"}
+    # Variables are named after the columns users see, and the old names are not advertised.
+    names = [v["name"] for v in client.get("/api/outreach/variables").json()]
+    assert names == ["company", "category", "city", "state", "location", "website", "contact_name", "contact_first_name"]
 
 
 def test_draft_export(client, snapshot, ids):
