@@ -44,6 +44,55 @@ For every lead the app answers three questions: why it is a potential customer (
 - **Score filters run in application code**, not SQL, which is fine for this dataset but would need materialised scores at scale.
 - No authentication or multi-user support. Scoring weights are illustrative, not a validated sales model.
 
+## Design and architecture
+
+### Approach: quality first
+
+SaaSquatch already finds, enriches and contacts leads on three separate pages. Rather than rebuild scraping in five hours, this prototype improves how those steps connect: one saved lead list moves through all of them, and at each step the tool says which leads deserve attention and what is missing.
+
+### UX choices
+
+- **One primary action per page**, in the same place: save a list, enrich, create drafts. Secondary actions sit in row menus.
+- **The sidebar is the workflow**, numbered 1–3, and each step ends with a button to the next.
+- **Status is always written out** ("Needs email", "Missing", "High") and never shown by colour alone.
+- **Every bulk action reports its outcome**: how many were processed, how many were skipped, and why.
+- **Nothing is hidden behind a score**: clicking a lead shows each signal, the points it earned, and the recommended next step.
+- **Empty, loading and error states** on every page tell the user what to do next.
+
+### Backend
+
+| Layer | Choice | Why |
+|---|---|---|
+| API | FastAPI, Pydantic 2 | Typed request/response validation and generated API docs at `/docs` |
+| Structure | routes → services → SQLAlchemy 2 models | Business rules (scoring, dedupe, templates) live in plain, testable functions |
+| Database | PostgreSQL 16 | Relational data with JSONB for the frozen copy each lead list keeps |
+| Migrations | Alembic | The test suite builds its schema from the migrations and fails on drift |
+| Integrity | Unique dedupe key, unique list name, check constraints, cascading deletes | Duplicates and orphans are prevented by the database, not only by code |
+| Transactions | One per request, rolled back on any error | A failed save never leaves a half-written list |
+
+### Performance and caching
+
+Implemented:
+
+- Indexed SQL filtering on category, state, revenue and name; server-side pagination.
+- Related rows loaded in batches (`selectinload`), so a list of any size costs a fixed number of queries.
+- Search input is debounced and out-of-date responses are discarded on the client.
+
+Not implemented, and what I would add at scale:
+
+- **No cache layer.** The dataset is small enough that every response is computed live. With real volume I would cache category counts and data-quality totals in Redis and invalidate them on import.
+- **Scores are computed per request** in application code. At scale they would be stored on the lead row and recalculated when the target profile changes, so score filters run in SQL.
+- **Enrichment runs inside the request.** Calls to a real provider would move to a background queue with progress reporting.
+
+### Hosting and deployment
+
+This prototype runs locally and is **not deployed**. The intended setup on AWS:
+
+- **Frontend**: static build (`npm run build`) on S3 behind CloudFront.
+- **API**: a container on AWS App Runner (or ECS Fargate), stateless so it scales horizontally.
+- **Database**: Amazon RDS for PostgreSQL.
+- **Deploy**: GitHub Actions runs both test suites, builds the image, runs `alembic upgrade head`, then releases.
+
 ## Run it
 
 Requirements: Python 3.12+, Node 20+, and PostgreSQL (Docker, or the bundled dev server below).
