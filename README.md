@@ -2,10 +2,10 @@
 
 A prototype adding two features to a lead-generation workflow like SaaSquatch's:
 
-1. **Saved lead lists.** Search results can be saved as a named list instead of being lost when you leave the page.
-2. **Outreach from a list.** The email step loads a saved list and drafts a message per lead, instead of the user typing each recipient's details by hand.
+1. **Target profile scoring.** Describe your ideal customer once (industries, states, revenue range) and every lead is scored 0–100 against it, with a priority, a reason for the score and a recommended next step.
+2. **Saved lead lists that drive outreach.** Search results can be saved as a named list, and the email step loads that list and drafts a message per lead, instead of the user typing each recipient's details by hand.
 
-Together they let one list of leads travel from discovery, through enrichment, into outreach.
+Together they tell you which leads deserve attention and let one list travel from discovery, through enrichment, into outreach.
 
 > **Work sample — evaluation only.** This repository is shared for review as part of a hiring process. It is not open source; see [LICENSE](LICENSE). All company and contact data is synthetic.
 
@@ -13,7 +13,7 @@ Together they let one list of leads travel from discovery, through enrichment, i
 
 ## The idea
 
-When I used SaaSquatch, I could find leads, enrich them and generate emails, but I did not find a way to save a set of leads and carry it between those steps, and the email step expected recipient details to be typed in.
+When I used SaaSquatch, I could find leads, enrich them and generate emails, but I did not find a way to rank leads against my own ideal customer, or to save a set of leads and carry it between those steps, and the email step expected recipient details to be typed in.
 
 This demo connects the three with a saved lead list:
 
