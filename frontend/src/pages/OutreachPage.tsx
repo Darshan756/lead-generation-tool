@@ -1,4 +1,4 @@
-import { CheckCircle2, Download, FileText, Layers, Mail, PenLine, X } from 'lucide-react'
+import { CheckCircle2, Download, FileText, Layers, Mail, PenLine, Send, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { DraftEditorDialog } from '../components/outreach/DraftEditorDialog'
@@ -101,6 +101,7 @@ export function OutreachPage() {
   const [editing, setEditing] = useState<OutreachDraft | null>(null)
   const [toDelete, setToDelete] = useState<OutreachDraft | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [sendingAll, setSendingAll] = useState(false)
 
   // Until the user edits it, the message is simply the first template.
   const first = templates.data?.[0]
@@ -163,6 +164,20 @@ export function OutreachPage() {
     }
   }
 
+  const unsent = (drafts.data ?? []).filter((draft) => draft.sent_at === null)
+  const sendAll = async () => {
+    setSendingAll(true)
+    try {
+      const outcome = await outreachService.send(unsent.map((draft) => draft.id))
+      toast.success(`${plural(outcome.sent, 'email')} sent.`)
+      drafts.reload()
+    } catch (reason) {
+      toast.error(reason instanceof Error ? reason.message : 'The emails could not be sent.')
+    } finally {
+      setSendingAll(false)
+    }
+  }
+
   const confirmDelete = async () => {
     if (!toDelete) return
     setDeleting(true)
@@ -187,7 +202,7 @@ export function OutreachPage() {
     <>
       <PageHeader
         title="Outreach"
-        description="Load a lead list, pick the leads that have an email, and turn one template into a personalised draft for each. Nothing is sent from this app."
+        description="Load a lead list, pick the leads that have an email, and turn one template into a personalised email for each."
       />
 
       <div role="tablist" aria-label="Outreach" className="mb-4 flex gap-1 border-b border-slate-200">
@@ -203,7 +218,7 @@ export function OutreachPage() {
               tab === key ? 'border-accent text-accent' : 'border-transparent text-slate-500 hover:text-ink',
             )}
           >
-            {key === 'compose' ? 'Compose' : `Drafts (${draftCount})`}
+            {key === 'compose' ? 'Compose' : `Emails (${draftCount})`}
           </button>
         ))}
       </div>
@@ -415,11 +430,25 @@ export function OutreachPage() {
         <Card>
           <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-2.5">
             <p className="tabular text-[13px] text-slate-600">
-              <span className="font-semibold text-ink">{plural(draftCount, 'draft')}</span> saved · none sent
+              <span className="font-semibold text-ink">{plural(draftCount, 'email')}</span> · {draftCount - unsent.length} sent ·{' '}
+              {unsent.length} waiting
             </p>
-            <Button size="sm" disabled={draftCount === 0} icon={<Download className="size-3.5" aria-hidden />} onClick={exportDrafts}>
-              Export CSV
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button size="sm" disabled={draftCount === 0} icon={<Download className="size-3.5" aria-hidden />} onClick={exportDrafts}>
+                Export CSV
+              </Button>
+              <Button
+                size="sm"
+                variant="primary"
+                loading={sendingAll}
+                disabled={unsent.length === 0}
+                title="Demo send: drafts are marked as sent. No email is delivered."
+                icon={<Send className="size-3.5" aria-hidden />}
+                onClick={sendAll}
+              >
+                {unsent.length > 0 ? `Send all ${unsent.length}` : 'All sent'}
+              </Button>
+            </div>
           </div>
           {drafts.error ? (
             <ErrorState message={drafts.error} onRetry={drafts.reload} />
@@ -439,7 +468,7 @@ export function OutreachPage() {
                     <th scope="col" className={TH}>To</th>
                     <th scope="col" className={TH}>Subject</th>
                     <th scope="col" className={TH}>Lead list</th>
-                    <th scope="col" className={TH}>Last edited</th>
+                    <th scope="col" className={TH}>Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -453,7 +482,15 @@ export function OutreachPage() {
                       <td className="max-w-[220px] truncate px-3 py-2 text-slate-700">{draft.to_email}</td>
                       <td className="max-w-[280px] truncate px-3 py-2 text-slate-700">{draft.subject}</td>
                       <td className="max-w-[180px] truncate px-3 py-2 text-xs text-slate-500">{draft.snapshot_name}</td>
-                      <td className="tabular whitespace-nowrap px-3 py-2 text-xs text-slate-500">{formatDateTime(draft.updated_at)}</td>
+                      <td className="whitespace-nowrap px-3 py-2">
+                        {draft.sent_at ? (
+                          <Badge tone="positive" icon={<CheckCircle2 className="size-3" aria-hidden />} title={`Sent ${formatDateTime(draft.sent_at)}`}>
+                            Sent
+                          </Badge>
+                        ) : (
+                          <Badge>Draft</Badge>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -470,6 +507,11 @@ export function OutreachPage() {
         onSaved={(saved) => {
           setEditing(null)
           toast.success(`Draft for ${saved.company_name} saved.`)
+          drafts.reload()
+        }}
+        onSent={(sent) => {
+          setEditing(null)
+          toast.success(`Email sent to ${sent.to_email}.`)
           drafts.reload()
         }}
       />

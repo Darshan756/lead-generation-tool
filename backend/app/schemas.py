@@ -365,8 +365,19 @@ class DraftOut(BaseModel):
     to_email: str
     subject: str
     body: str
+    sent_at: datetime | None
     created_at: datetime
     updated_at: datetime
+
+
+class SendRequest(BaseModel):
+    draft_ids: list[int] = Field(min_length=1, max_length=5000)
+
+
+class SendResult(BaseModel):
+    sent: int
+    already_sent: int
+    drafts: list[DraftOut]
 
 
 class GenerateResult(BaseModel):

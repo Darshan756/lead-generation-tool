@@ -50,6 +50,12 @@ def list_drafts(db: Db, snapshot_id: int | None = None):
     return [outreach_service.draft_out(d) for d in outreach_service.list_drafts(db, snapshot_id)]
 
 
+@router.post("/drafts/send", response_model=schemas.SendResult)
+def send_drafts(payload: schemas.SendRequest, db: Db):
+    """Simulated send: records the drafts as sent. No email is delivered."""
+    return outreach_service.send_drafts(db, payload.draft_ids)
+
+
 @router.get("/drafts/export")
 def export_drafts(
     db: Db,

@@ -5,8 +5,9 @@ import type { OutreachDraft } from '../../types'
 import { ToastProvider } from '../ui/Toast'
 import { DraftEditorDialog } from './DraftEditorDialog'
 
-vi.mock('../../services/outreach-service', () => ({ outreachService: { updateDraft: vi.fn() } }))
+vi.mock('../../services/outreach-service', () => ({ outreachService: { updateDraft: vi.fn(), send: vi.fn() } }))
 const updateDraft = vi.mocked(outreachService.updateDraft)
+const send = vi.mocked(outreachService.send)
 
 const DRAFT: OutreachDraft = {
   id: 5,
@@ -19,15 +20,16 @@ const DRAFT: OutreachDraft = {
   to_email: 'hello@alpha.example',
   subject: 'Quick question',
   body: 'Hi Avery,\n\nHello.',
+  sent_at: null,
   created_at: '2026-10-12T09:00:00Z',
   updated_at: '2026-10-12T09:00:00Z',
 }
 
-function setup() {
-  const handlers = { onClose: vi.fn(), onSaved: vi.fn(), onDelete: vi.fn() }
+function setup(draft: OutreachDraft = DRAFT) {
+  const handlers = { onClose: vi.fn(), onSaved: vi.fn(), onSent: vi.fn(), onDelete: vi.fn() }
   render(
     <ToastProvider>
-      <DraftEditorDialog draft={DRAFT} {...handlers} />
+      <DraftEditorDialog draft={draft} {...handlers} />
     </ToastProvider>,
   )
   return handlers
@@ -36,6 +38,7 @@ function setup() {
 describe('DraftEditorDialog', () => {
   beforeEach(() => {
     updateDraft.mockReset()
+    send.mockReset()
   })
 
   it('saves edited subject and message', async () => {
@@ -64,6 +67,32 @@ describe('DraftEditorDialog', () => {
       'href',
       'mailto:hello%40alpha.example?subject=Quick%20question%20now&body=Hi%20Avery%2C%0A%0AHello.',
     )
+  })
+
+  it('sends the draft and reports it to the parent', async () => {
+    const sentDraft = { ...DRAFT, sent_at: '2026-10-12T10:00:00Z' }
+    send.mockResolvedValue({ sent: 1, already_sent: 0, drafts: [sentDraft] })
+    const { onSent } = setup()
+    await userEvent.click(screen.getByRole('button', { name: 'Send' }))
+    expect(send).toHaveBeenCalledWith([5])
+    expect(onSent).toHaveBeenCalledWith(sentDraft)
+  })
+
+  it('requires unsaved edits to be saved before sending', async () => {
+    setup()
+    await userEvent.type(screen.getByLabelText('Subject'), '!')
+    expect(screen.getByRole('button', { name: 'Send' })).toBeDisabled()
+    expect(send).not.toHaveBeenCalled()
+  })
+
+  it('shows a sent email as read-only with no Send or Save button', () => {
+    setup({ ...DRAFT, sent_at: '2026-10-12T10:00:00Z' })
+    expect(screen.getByRole('dialog', { name: 'Email to Alpha Software' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Subject')).toHaveAttribute('readonly')
+    expect(screen.getByLabelText('Message')).toHaveAttribute('readonly')
+    expect(screen.getByText(/^Sent /)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Send' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Save draft' })).not.toBeInTheDocument()
   })
 
   it('asks the parent to confirm deletion', async () => {

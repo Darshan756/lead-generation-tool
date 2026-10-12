@@ -200,3 +200,48 @@ def test_draft_export(client, snapshot, ids):
     assert alpha["Message"] == "Hi Avery,\n\nI saw alpha.example — Software Development in San Diego, CA.\n\nBest"
     one = client.get("/api/outreach/drafts/export", params={"ids": [drafts[0]["id"]]})
     assert len(list(csv.DictReader(io.StringIO(one.text.lstrip("﻿"))))) == 1
+
+
+# --- sending (simulated) -----------------------------------------------------
+
+
+def test_send_marks_drafts_as_sent_and_is_idempotent(client, snapshot, ids):
+    client.post(f"/api/snapshots/{snapshot['id']}/enrich")
+    drafts = generate(client, list(ids.values())).json()["drafts"]
+    assert all(d["sent_at"] is None for d in drafts)
+    first, second, third = (d["id"] for d in drafts)
+
+    one = client.post("/api/outreach/drafts/send", json={"draft_ids": [first]})
+    assert one.status_code == 200, one.text
+    assert (one.json()["sent"], one.json()["already_sent"]) == (1, 0)
+    sent_at = one.json()["drafts"][0]["sent_at"]
+    assert sent_at is not None
+
+    # "Send all" skips what was already sent and keeps its original time.
+    rest = client.post("/api/outreach/drafts/send", json={"draft_ids": [first, second, third]}).json()
+    assert (rest["sent"], rest["already_sent"]) == (2, 1)
+    assert rest["drafts"][0]["sent_at"] == sent_at
+    assert all(d["sent_at"] for d in client.get("/api/outreach/drafts").json())
+
+
+def test_sent_emails_cannot_be_edited_but_can_be_regenerated(client, ids):
+    alpha = [ids["Alpha Software"]]
+    draft = generate(client, alpha).json()["drafts"][0]
+    client.post("/api/outreach/drafts/send", json={"draft_ids": [draft["id"]]})
+    response = client.patch(f"/api/outreach/drafts/{draft['id']}", json={"subject": "Changed", "body": "Changed"})
+    assert response.status_code == 409 and "already been sent" in response.json()["detail"]
+    assert client.get("/api/outreach/drafts").json()[0]["subject"] == draft["subject"]
+    # Replacing the draft produces a new, unsent one.
+    replaced = generate(client, alpha, overwrite=True).json()["drafts"][0]
+    assert replaced["sent_at"] is None
+
+
+def test_send_validation_and_export_status(client, ids):
+    assert client.post("/api/outreach/drafts/send", json={"draft_ids": []}).status_code == 422
+    assert client.post("/api/outreach/drafts/send", json={"draft_ids": [99999]}).status_code == 422
+    draft = generate(client, [ids["Alpha Software"]]).json()["drafts"][0]
+    rows = lambda: list(csv.DictReader(io.StringIO(client.get("/api/outreach/drafts/export").text.lstrip("﻿"))))  # noqa: E731
+    assert rows()[0]["Status"] == "Draft — not sent"
+    client.post("/api/outreach/drafts/send", json={"draft_ids": [draft["id"]]})
+    # The export never claims a real delivery.
+    assert rows()[0]["Status"] == "Sent (simulated — not delivered)"

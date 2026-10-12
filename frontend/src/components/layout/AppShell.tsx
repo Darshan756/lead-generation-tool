@@ -1,4 +1,4 @@
-import { FlaskConical, Layers, Mail, Menu, Search, Sparkles, X } from 'lucide-react'
+import { Layers, Mail, Menu, Search, Sparkles, X } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { cn } from '../../lib/cn'
@@ -68,15 +68,6 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           <NavList items={LIBRARY} onNavigate={onNavigate} />
         </div>
       </nav>
-      <div className="border-t border-white/10 px-3 py-3">
-        <div className="flex items-start gap-2 rounded-md bg-white/5 px-2.5 py-2 text-[11px] leading-snug text-slate-300">
-          <FlaskConical className="mt-0.5 size-3.5 shrink-0 text-amber-300" aria-hidden />
-          <p>
-            <span className="font-semibold text-white">Demo workspace.</span> All companies and contacts are synthetic.
-            Nothing is verified and no email is sent.
-          </p>
-        </div>
-      </div>
     </>
   )
 }

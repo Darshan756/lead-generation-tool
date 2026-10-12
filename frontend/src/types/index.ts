@@ -251,8 +251,15 @@ export interface OutreachDraft {
   to_email: string
   subject: string
   body: string
+  sent_at: string | null
   created_at: string
   updated_at: string
+}
+
+export interface SendResult {
+  sent: number
+  already_sent: number
+  drafts: OutreachDraft[]
 }
 
 export interface GenerateInput {

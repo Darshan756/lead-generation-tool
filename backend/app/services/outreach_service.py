@@ -1,8 +1,13 @@
-"""Outreach drafts generated from templates. Nothing is ever sent."""
+"""Outreach drafts generated from templates.
+
+Sending is simulated: "send" records when the user sent a draft, and no email
+leaves the system.
+"""
 
 from __future__ import annotations
 
 import re
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import select
@@ -198,6 +203,7 @@ def generate(db: Session, payload: GenerateRequest) -> dict[str, Any]:
         draft.to_email = clean(item.data["email"])
         draft.subject = subject[:300]
         draft.body = body
+        draft.sent_at = None  # a regenerated draft has not been sent
         drafts.append(draft)
     db.flush()
     for draft in drafts:
@@ -225,6 +231,7 @@ def draft_out(draft: OutreachDraft) -> dict[str, Any]:
         "to_email": draft.to_email,
         "subject": draft.subject,
         "body": draft.body,
+        "sent_at": draft.sent_at,
         "created_at": draft.created_at,
         "updated_at": draft.updated_at,
     }
@@ -256,12 +263,36 @@ def get_draft(db: Session, draft_id: int) -> OutreachDraft:
 
 def update_draft(db: Session, draft_id: int, payload: DraftUpdate) -> OutreachDraft:
     draft = get_draft(db, draft_id)
+    if draft.sent_at is not None:
+        raise ConflictError("This email has already been sent and can no longer be edited.")
     if _LEFTOVER_RE.search(payload.subject) or _LEFTOVER_RE.search(payload.body):
         raise ValidationError("Remove the unresolved {{variables}} before saving this draft.")
     draft.subject, draft.body = payload.subject.strip(), payload.body.strip()
     db.flush()
     db.refresh(draft)
     return draft
+
+
+def send_drafts(db: Session, draft_ids: list[int]) -> dict[str, Any]:
+    """Mark drafts as sent. Simulated: no email is delivered. Drafts that were
+    already sent are left alone, so pressing Send twice is harmless."""
+    ids = list(dict.fromkeys(draft_ids))
+    found = {draft.id: draft for draft in db.scalars(_draft_query().where(OutreachDraft.id.in_(ids)))}
+    missing = [i for i in ids if i not in found]
+    if missing:
+        raise ValidationError(f"These drafts do not exist: {missing[:10]}.")
+    now = datetime.now(UTC)
+    sent = already = 0
+    for draft in found.values():
+        if draft.sent_at is None:
+            draft.sent_at = now
+            sent += 1
+        else:
+            already += 1
+    db.flush()
+    for draft in found.values():
+        db.refresh(draft)
+    return {"sent": sent, "already_sent": already, "drafts": [draft_out(found[i]) for i in ids]}
 
 
 def delete_draft(db: Session, draft_id: int) -> None:
@@ -277,7 +308,9 @@ def drafts_csv(drafts: list[OutreachDraft]) -> str:
         rows.append(
             [
                 out["company_name"], out["industry"], out["owner_name"], out["to_email"], out["subject"],
-                out["body"], out["snapshot_name"], "Draft — not sent", csv_export.DATA_NOTE,
+                out["body"], out["snapshot_name"],
+                "Sent (simulated — not delivered)" if draft.sent_at else "Draft — not sent",
+                csv_export.DATA_NOTE,
             ]
         )
     return csv_export.to_csv(headers, rows)
