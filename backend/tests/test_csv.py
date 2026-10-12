@@ -19,4 +19,4 @@ def test_formula_like_cells_are_neutralised():
 
 def test_filename_is_readable_and_safe():
     name = filename("snapshot", "California Healthcare / Oct 2026!")
-    assert name.startswith("boosta-snapshot-california-healthcare-oct-2026-") and name.endswith(".csv")
+    assert name.startswith("demo-snapshot-california-healthcare-oct-2026-") and name.endswith(".csv")

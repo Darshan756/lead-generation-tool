@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    database_url: str = "postgresql+psycopg://boosta:boosta@localhost:5432/boosta"
+    database_url: str = "postgresql+psycopg://demo:demo@localhost:5432/leads_demo"
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
 
     @field_validator("database_url")

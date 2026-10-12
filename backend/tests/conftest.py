@@ -33,7 +33,7 @@ def _test_database_url() -> str:
         import pgserver
     except ImportError:  # pragma: no cover
         raise RuntimeError("Set TEST_DATABASE_URL, or `pip install -r requirements-dev.txt` for pgserver.")
-    server = pgserver.get_server(Path(tempfile.mkdtemp(prefix="boosta-test-pg-")))
+    server = pgserver.get_server(Path(tempfile.mkdtemp(prefix="leads-demo-test-pg-")))
     return server.get_uri()
 
 

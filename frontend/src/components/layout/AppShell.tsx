@@ -47,10 +47,10 @@ function Brand() {
   return (
     <div className="flex items-center gap-2">
       <span className="flex size-7 items-center justify-center rounded-md bg-indigo-500 text-sm font-bold text-white" aria-hidden>
-        B
+        D
       </span>
       <div className="leading-tight">
-        <p className="text-sm font-semibold text-white">Boosta</p>
+        <p className="text-sm font-semibold text-white">Demo</p>
         <p className="text-[11px] text-slate-400">Lead intelligence</p>
       </div>
     </div>

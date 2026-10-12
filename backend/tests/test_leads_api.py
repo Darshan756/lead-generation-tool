@@ -143,7 +143,7 @@ def test_export_respects_selection_and_escapes_values(client, lead_ids):
     response = client.post("/api/leads/export", json={"lead_ids": ids})
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/csv")
-    assert "boosta-leads-" in response.headers["content-disposition"]
+    assert "demo-leads-" in response.headers["content-disposition"]
 
     rows = list(csv.DictReader(io.StringIO(response.text.lstrip("﻿"))))
     assert [r["Company"] for r in rows] == ["Delta, Unknown \"Co\"", "Alpha Software"]

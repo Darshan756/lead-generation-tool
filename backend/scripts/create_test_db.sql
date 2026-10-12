@@ -1,1 +1,1 @@
-CREATE DATABASE boosta_test;
+CREATE DATABASE leads_demo_test;

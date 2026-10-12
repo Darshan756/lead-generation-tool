@@ -39,7 +39,7 @@ async function send(path: string, init?: RequestInit): Promise<Response> {
       headers: init?.body ? { 'Content-Type': 'application/json', ...init.headers } : init?.headers,
     })
   } catch {
-    throw new ApiError(0, 'Cannot reach the Boosta API. Check that the backend is running.')
+    throw new ApiError(0, 'Cannot reach the API. Check that the backend is running.')
   }
   if (!response.ok) {
     const body: unknown = await response.json().catch(() => null)
@@ -66,7 +66,7 @@ export const del = (path: string) => request<void>(path, { method: 'DELETE' })
 export async function download(path: string, init?: RequestInit): Promise<string> {
   const response = await send(path, init)
   const disposition = response.headers.get('Content-Disposition') ?? ''
-  const filename = /filename="?([^";]+)"?/.exec(disposition)?.[1] ?? 'boosta-export.csv'
+  const filename = /filename="?([^";]+)"?/.exec(disposition)?.[1] ?? 'leads-export.csv'
   const url = URL.createObjectURL(await response.blob())
   const link = document.createElement('a')
   link.href = url

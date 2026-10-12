@@ -180,7 +180,7 @@ def test_draft_export(client, snapshot, ids):
     drafts = generate(client, list(ids.values())).json()["drafts"]
     response = client.get("/api/outreach/drafts/export", params={"snapshot_id": snapshot["id"]})
     assert response.status_code == 200
-    assert "boosta-outreach-drafts-" in response.headers["content-disposition"]
+    assert "demo-outreach-drafts-" in response.headers["content-disposition"]
     rows = list(csv.DictReader(io.StringIO(response.text.lstrip("﻿"))))
     assert len(rows) == 3
     alpha = next(r for r in rows if r["Company"] == "Alpha Software")

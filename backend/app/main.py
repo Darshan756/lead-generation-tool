@@ -7,7 +7,7 @@ from app.core.config import get_settings
 from app.errors import DomainError
 
 app = FastAPI(
-    title="Boosta — Lead Intelligence & Enrichment API",
+    title="Lead Intelligence & Enrichment Demo API",
     description="Prototype API. All company data is synthetic demonstration data.",
     version="0.1.0",
 )

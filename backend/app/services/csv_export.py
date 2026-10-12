@@ -89,5 +89,5 @@ def leads_csv(views: list[dict[str, Any]], extra: list[tuple[str, str]] | None =
 
 def filename(prefix: str, label: str | None = None) -> str:
     slug = re.sub(r"[^a-z0-9]+", "-", (label or "").lower()).strip("-")[:60]
-    parts = ["boosta", prefix] + ([slug] if slug else []) + [date.today().isoformat()]
+    parts = ["demo", prefix] + ([slug] if slug else []) + [date.today().isoformat()]
     return "-".join(parts) + ".csv"

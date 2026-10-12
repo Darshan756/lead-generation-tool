@@ -130,7 +130,7 @@ function TargetProfileForm({ open, profile, facets, onClose, onSaved }: TargetPr
 
         {isEmpty && (
           <p className="rounded-md bg-amber-50 px-3 py-2.5 text-xs leading-relaxed text-amber-900 ring-1 ring-inset ring-amber-200">
-            With no criteria, leads are shown as “Not scored”. Boosta will not invent a score that looks personalised.
+            With no criteria, leads are shown as “Not scored”. The app will not invent a score that looks personalised.
           </p>
         )}
         {error && (

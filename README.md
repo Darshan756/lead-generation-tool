@@ -1,4 +1,4 @@
-# Boosta — Lead Intelligence & Enrichment
+# Lead Intelligence & Enrichment — Demo
 
 A prototype showing one improvement to a lead-generation workflow: **a saved snapshot that carries a list of leads from discovery, through enrichment, into outreach**, so nothing is re-typed between steps.
 
@@ -10,7 +10,7 @@ A prototype showing one improvement to a lead-generation workflow: **a saved sna
 
 A typical lead tool has three separate pages: find leads, enrich them, write outreach. Each page starts from scratch, and the email step expects the user to type recipient details by hand.
 
-Boosta connects the three with a snapshot:
+This demo connects the three with a snapshot:
 
 1. **Find Leads** — search one or several business categories, filter by revenue, priority, data confidence and contact readiness, then save the result as a named snapshot.
 2. **Enrichment** — open a snapshot, see exactly which leads lack an email or contact, fill the gaps, and see before/after figures.

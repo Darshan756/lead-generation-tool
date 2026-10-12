@@ -75,7 +75,7 @@ function DraftEditor({ draft, onClose, onSaved, onDelete }: { draft: OutreachDra
           </Button>
           <a
             href={mailtoLink(draft.to_email, subject, body)}
-            title="Opens this draft in your own email app. Boosta does not send email."
+            title="Opens this draft in your own email app. This app does not send email."
             className="inline-flex h-8 items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 text-[13px] font-medium text-slate-700 shadow-sm hover:border-slate-400 hover:bg-slate-50"
           >
             <ExternalLink className="size-3.5" aria-hidden />
@@ -90,7 +90,7 @@ function DraftEditor({ draft, onClose, onSaved, onDelete }: { draft: OutreachDra
       <form id="draft-editor" onSubmit={save} className="space-y-3" noValidate>
         <TextField label="Subject" value={subject} maxLength={300} error={subjectError} onChange={(event) => setSubject(event.target.value)} />
         <TextArea label="Message" rows={12} value={body} maxLength={10000} error={bodyError ?? error} onChange={(event) => setBody(event.target.value)} />
-        <p className="text-xs text-slate-500">Drafts are saved in Boosta and are never sent automatically.</p>
+        <p className="text-xs text-slate-500">Drafts are saved here and are never sent automatically.</p>
       </form>
     </Dialog>
   )

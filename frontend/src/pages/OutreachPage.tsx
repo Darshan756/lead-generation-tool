@@ -187,7 +187,7 @@ export function OutreachPage() {
     <>
       <PageHeader
         title="Outreach"
-        description="Load a snapshot, pick the leads that have an email, and turn one template into a personalised draft for each. Nothing is sent from Boosta."
+        description="Load a snapshot, pick the leads that have an email, and turn one template into a personalised draft for each. Nothing is sent from this app."
       />
 
       <div role="tablist" aria-label="Outreach" className="mb-4 flex gap-1 border-b border-slate-200">

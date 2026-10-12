@@ -4,18 +4,18 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: boosta
-      POSTGRES_PASSWORD: boosta
-      POSTGRES_DB: boosta
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: demo
+      POSTGRES_DB: leads_demo
     ports:
       - "5432:5432"
     volumes:
-      - boosta_pgdata:/var/lib/postgresql/data
+      - leads_demo_pgdata:/var/lib/postgresql/data
       - ./backend/scripts/create_test_db.sql:/docker-entrypoint-initdb.d/create_test_db.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U boosta"]
+      test: ["CMD-SHELL", "pg_isready -U demo -d leads_demo"]
       interval: 5s
       retries: 10
 
 volumes:
-  boosta_pgdata:
+  leads_demo_pgdata:
