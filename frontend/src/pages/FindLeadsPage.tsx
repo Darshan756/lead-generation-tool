@@ -1,4 +1,4 @@
-import { Camera, Download, Import, SearchX, Target, X } from 'lucide-react'
+import { Camera, Download, Import, Search, SearchX, Target, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CreateSnapshotDialog } from '../components/leads/CreateSnapshotDialog'
@@ -32,6 +32,8 @@ export function FindLeadsPage() {
   const [snapshotIds, setSnapshotIds] = useState<number[] | null>(null)
   const [profileOpen, setProfileOpen] = useState(false)
   const [importOpen, setImportOpen] = useState(false)
+  // The table starts empty; leads load once the user searches, filters, or asks for everything.
+  const [showAll, setShowAll] = useState(false)
   const [exporting, setExporting] = useState(false)
 
   // Typing in the search box should not fire a request per keystroke.
@@ -40,12 +42,16 @@ export function FindLeadsPage() {
   const queryKey = JSON.stringify({ ...filters, q: debouncedQ })
   const query = useMemo(() => JSON.parse(queryKey) as LeadFilters, [queryKey])
 
-  const leads = useAsync(() => leadService.search(query, sort, page, PAGE_SIZE), [queryKey, sort.by, sort.dir, page])
+  const searching = showAll || activeFilterChips(query).length > 0
+  const leads = useAsync(
+    () => (searching ? leadService.search(query, sort, page, PAGE_SIZE) : Promise.resolve(null)),
+    [searching, queryKey, sort.by, sort.dir, page],
+  )
   const facets = useAsync(() => leadService.facets(), [])
   const quality = useAsync(() => leadService.dataQuality(), [])
   const profile = useAsync(() => leadService.getTargetProfile(), [])
 
-  const data = leads.data
+  const data = searching ? (leads.data ?? undefined) : undefined
   const matchingIds = data?.matching_ids
 
   // Only leads that still match the filters count as selected, so "N selected"
@@ -59,6 +65,10 @@ export function FindLeadsPage() {
   const updateFilters = (next: LeadFilters) => {
     setFilters(next)
     setPage(1)
+  }
+  const resetFilters = () => {
+    updateFilters(EMPTY_FILTERS)
+    setShowAll(false)
   }
   const toggle = (id: number) =>
     setSelected((current) => {
@@ -136,7 +146,7 @@ export function FindLeadsPage() {
       )}
 
       <Card>
-        <LeadFiltersBar filters={filters} facets={facets.data} onChange={updateFilters} onReset={() => updateFilters(EMPTY_FILTERS)} />
+        <LeadFiltersBar filters={filters} facets={facets.data} onChange={updateFilters} onReset={resetFilters} />
 
         {/* Result count, or the bulk-action bar once something is selected. */}
         <div
@@ -152,8 +162,10 @@ export function FindLeadsPage() {
                   <span className="font-semibold text-ink">{plural(total, 'company', 'companies')}</span>
                   {hasFilters ? ' match your filters' : ' in this workspace'}
                 </>
-              ) : (
+              ) : searching ? (
                 'Loading…'
+              ) : (
+                'No leads loaded yet'
               )}
             </p>
           ) : (
@@ -183,13 +195,22 @@ export function FindLeadsPage() {
 
         {leads.error ? (
           <ErrorState message={leads.error} onRetry={leads.reload} />
+        ) : !searching ? (
+          <EmptyState
+            icon={<Search className="size-5" />}
+            title="Search to load leads"
+            action={<Button onClick={() => setShowAll(true)}>Show all leads</Button>}
+          >
+            Type a company, category or city in the search box, or pick a filter above, and matching leads will appear
+            here.
+          </EmptyState>
         ) : !data ? (
           <LoadingState label="Loading leads…" />
         ) : data.items.length === 0 ? (
           <EmptyState
             icon={<SearchX className="size-5" />}
             title="No leads match these filters"
-            action={hasFilters && <Button onClick={() => updateFilters(EMPTY_FILTERS)}>Reset filters</Button>}
+            action={hasFilters && <Button onClick={resetFilters}>Reset filters</Button>}
           >
             Try removing a filter or searching for a different category.
           </EmptyState>

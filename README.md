@@ -58,6 +58,7 @@ SaaSquatch already finds, enriches and contacts leads on three separate pages. R
 - **Every bulk action reports its outcome**: how many were processed, how many were skipped, and why.
 - **Nothing is hidden behind a score**: clicking a lead shows each signal, the points it earned, and the recommended next step.
 - **Empty, loading and error states** on every page tell the user what to do next.
+- **Find Leads starts empty** and loads results when the user searches or filters, mirroring a search-driven sourcing tool.
 
 ### Backend
 
@@ -124,7 +125,7 @@ npm run dev                                # http://localhost:5173
 
 ```bash
 cd backend && pytest          # 87 tests, run against PostgreSQL
-cd frontend && npm test       # 48 tests
+cd frontend && npm test       # 52 tests
 cd frontend && npm run lint && npm run build
 ```
 
