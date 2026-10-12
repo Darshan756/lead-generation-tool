@@ -107,6 +107,7 @@ def summary(snapshot: Snapshot) -> dict[str, Any]:
         "email_ready_at_creation": then.count("email_ready"),
         "invalid_email": now.count("invalid_email"),
         "needs_enrichment": now.count("needs_enrichment"),
+        "incomplete_count": sum(1 for item in snapshot.leads if quality.confidence(item.data)["missing_fields"]),
         "enriched_lead_count": sum(1 for item in snapshot.leads if item.enriched_at),
         "draft_count": draft_count,
     }

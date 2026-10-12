@@ -13,8 +13,8 @@ A typical lead tool has three separate pages: find leads, enrich them, write out
 This demo connects the three with a snapshot:
 
 1. **Find Leads** — import companies from Excel or CSV, search one or several business categories, filter by revenue, priority, data confidence and contact readiness, then save the result as a named snapshot.
-2. **Enrichment** — open a snapshot, see exactly which leads lack an email or contact, fill the gaps, and see before/after figures.
-3. **Outreach** — load one or more snapshots, see how many leads can actually be emailed, select them individually or in bulk, and turn one template into a personalised draft per lead.
+2. **Enrichment** — open a snapshot, see what is missing field by field (email, phone, website, contact, revenue, company size), fill the gaps, and see what enrichment filled.
+3. **Outreach** — load one or more snapshots, see how many leads have a usable email (the only field outreach needs), select them individually or in bulk, and turn one template into a personalised draft per lead.
 
 For every lead the app answers three questions: why it is a potential customer (score breakdown), why to prioritise it (High / Medium / Low), and what to do next (recommended next step).
 
@@ -75,7 +75,7 @@ npm run dev                                # http://localhost:5173
 
 ```bash
 cd backend && pytest          # 87 tests, run against PostgreSQL
-cd frontend && npm test       # 41 tests
+cd frontend && npm test       # 48 tests
 cd frontend && npm run lint && npm run build
 ```
 

@@ -1,11 +1,12 @@
 import { ArrowLeft, ArrowRight, CheckCircle2, Download, Layers, Pencil, Sparkles, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { DataQualitySummary } from '../components/leads/DataQualitySummary'
 import { LeadDrawer } from '../components/leads/LeadDrawer'
-import { ContactBadge, ScoreCell, StageBadge } from '../components/leads/indicators'
+import { ScoreCell, StageBadge } from '../components/leads/indicators'
 import { CriteriaChips } from '../components/snapshots/CriteriaChips'
 import { EditLeadDialog } from '../components/snapshots/EditLeadDialog'
+import { FieldCell } from '../components/snapshots/FieldCell'
+import { FieldCoverageCard } from '../components/snapshots/FieldCoverageCard'
 import { Badge } from '../components/ui/Badge'
 import { Button, IconButton } from '../components/ui/Button'
 import { Checkbox } from '../components/ui/Checkbox'
@@ -13,13 +14,13 @@ import { Card, EmptyState, ErrorState, LoadingState, PageHeader } from '../compo
 import { useToast } from '../components/ui/useToast'
 import { useAsync } from '../hooks/useAsync'
 import { cn } from '../lib/cn'
-import { FIELD_LABELS, formatDate, plural } from '../lib/format'
+import { FIELD_LABELS, formatDate, formatMoney, formatNumber, plural } from '../lib/format'
 import { snapshotService } from '../services/snapshot-service'
 import type { EnrichResult, SnapshotLead } from '../types'
 
 const TH = 'px-3 py-2 text-left text-xs font-medium text-slate-500'
 
-type View = 'all' | 'incomplete' | 'ready' | 'enriched'
+type View = 'all' | 'incomplete' | 'complete' | 'enriched'
 
 const isIncomplete = (lead: SnapshotLead) => lead.confidence.missing_fields.length > 0
 
@@ -29,7 +30,7 @@ function SnapshotPicker() {
   const snapshots = useAsync(() => snapshotService.list(), [])
   return (
     <>
-      <PageHeader title="Enrichment" description="Choose a snapshot to fill in missing emails, contacts and company details." />
+      <PageHeader title="Enrichment" description="Choose a snapshot to fill in whatever is missing: emails, phone numbers, contacts, revenue and company size." />
       <Card>
         {snapshots.error ? (
           <ErrorState message={snapshots.error} onRetry={snapshots.reload} />
@@ -50,7 +51,6 @@ function SnapshotPicker() {
         ) : (
           <ul className="divide-y divide-slate-100">
             {snapshots.data.map((snapshot) => {
-              const needsWork = snapshot.needs_enrichment + snapshot.invalid_email
               return (
                 <li key={snapshot.id}>
                   <Link to={`/enrichment/${snapshot.id}`} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 hover:bg-slate-50">
@@ -60,14 +60,14 @@ function SnapshotPicker() {
                         <StageBadge stage={snapshot.stage} />
                       </p>
                       <p className="tabular mt-0.5 text-xs text-slate-500">
-                        {plural(snapshot.lead_count, 'lead')} · {snapshot.email_ready} email-ready · saved {formatDate(snapshot.created_at)}
+                        {plural(snapshot.lead_count, 'lead')} · saved {formatDate(snapshot.created_at)}
                       </p>
                     </div>
                     <span className="flex items-center gap-2 text-[13px]">
-                      {needsWork > 0 ? (
-                        <Badge tone="warning">{plural(needsWork, 'lead')} without a usable email</Badge>
+                      {snapshot.incomplete_count > 0 ? (
+                        <Badge tone="warning">{plural(snapshot.incomplete_count, 'lead')} with missing information</Badge>
                       ) : (
-                        <Badge tone="positive">Every lead has an email</Badge>
+                        <Badge tone="positive">Every lead is complete</Badge>
                       )}
                       <ArrowRight className="size-4 text-slate-400" aria-hidden />
                     </span>
@@ -83,9 +83,9 @@ function SnapshotPicker() {
 }
 
 function ResultBanner({ result, onDismiss }: { result: EnrichResult; onDismiss: () => void }) {
-  const filled = Object.entries(result.fields_filled)
-    .map(([field, count]) => `${count} ${(FIELD_LABELS[field] ?? field).toLowerCase()}`)
-    .join(', ')
+  const entries = Object.entries(result.fields_filled)
+  const totalFilled = entries.reduce((sum, [, count]) => sum + count, 0)
+  const filled = entries.map(([field, count]) => `${(FIELD_LABELS[field] ?? field).toLowerCase()} ${count}`).join(' · ')
   return (
     <div role="status" className="mb-4 rounded-lg border border-indigo-200 bg-accent-soft px-4 py-3 text-[13px]">
       <div className="flex items-start justify-between gap-3">
@@ -93,10 +93,10 @@ function ResultBanner({ result, onDismiss }: { result: EnrichResult; onDismiss: 
           <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-accent" aria-hidden />
           <div>
             <p className="font-semibold text-indigo-950">
-              Enriched {result.enriched} of {plural(result.processed, 'lead')} · {plural(result.emails_added, 'email')} added
+              Enriched {result.enriched} of {plural(result.processed, 'lead')} · {plural(totalFilled, 'missing field')} filled
             </p>
             <p className="mt-0.5 text-indigo-900">
-              {filled ? `Filled: ${filled}.` : 'No new fields were filled.'}
+              {filled ? `Filled — ${filled}.` : 'No new fields were filled.'}
               {result.already_complete > 0 && ` ${plural(result.already_complete, 'lead')} already complete.`}
             </p>
           </div>
@@ -138,7 +138,7 @@ function EnrichmentWorkspace({ snapshotId }: { snapshotId: number }) {
     () => ({
       all: leads.length,
       incomplete: leads.filter(isIncomplete).length,
-      ready: leads.filter((lead) => lead.contact_status === 'email_ready').length,
+      complete: leads.filter((lead) => !isIncomplete(lead)).length,
       enriched: leads.filter((lead) => lead.enriched_at).length,
     }),
     [leads],
@@ -146,7 +146,7 @@ function EnrichmentWorkspace({ snapshotId }: { snapshotId: number }) {
   const visible = useMemo(
     () =>
       leads.filter((lead) =>
-        view === 'incomplete' ? isIncomplete(lead) : view === 'ready' ? lead.contact_status === 'email_ready' : view === 'enriched' ? Boolean(lead.enriched_at) : true,
+        view === 'incomplete' ? isIncomplete(lead) : view === 'complete' ? !isIncomplete(lead) : view === 'enriched' ? Boolean(lead.enriched_at) : true,
       ),
     [leads, view],
   )
@@ -196,7 +196,7 @@ function EnrichmentWorkspace({ snapshotId }: { snapshotId: number }) {
   const tabs: { key: View; label: string }[] = [
     { key: 'all', label: 'All' },
     { key: 'incomplete', label: 'Incomplete' },
-    { key: 'ready', label: 'Email ready' },
+    { key: 'complete', label: 'Complete' },
     { key: 'enriched', label: 'Enriched' },
   ]
 
@@ -238,7 +238,7 @@ function EnrichmentWorkspace({ snapshotId }: { snapshotId: number }) {
 
       {result && <ResultBanner result={result} onDismiss={() => setResult(null)} />}
 
-      <DataQualitySummary quality={data.quality} before={data.quality_at_creation} title="Data quality in this snapshot" />
+      <FieldCoverageCard quality={data.quality} atCapture={data.quality_at_creation} />
 
       <Card>
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-3 py-2.5">
@@ -288,7 +288,7 @@ function EnrichmentWorkspace({ snapshotId }: { snapshotId: number }) {
           </EmptyState>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-[13px]">
+            <table className="w-full min-w-[900px] text-[13px]">
               <thead className="border-b border-slate-200 bg-slate-50">
                 <tr>
                   <th scope="col" className="w-10 px-3 py-2">
@@ -306,9 +306,12 @@ function EnrichmentWorkspace({ snapshotId }: { snapshotId: number }) {
                     />
                   </th>
                   <th scope="col" className={TH}>Company</th>
-                  <th scope="col" className={TH}>Contact</th>
                   <th scope="col" className={TH}>Email</th>
-                  <th scope="col" className={TH}>Still missing</th>
+                  <th scope="col" className={TH}>Phone</th>
+                  <th scope="col" className={cn(TH, 'hidden 2xl:table-cell')}>Website</th>
+                  <th scope="col" className={TH}>Contact name</th>
+                  <th scope="col" className={TH}>Revenue</th>
+                  <th scope="col" className={TH}>Employees</th>
                   <th scope="col" className={TH}>Score</th>
                   <th scope="col" className="w-10 px-2 py-2">
                     <span className="sr-only">Edit</span>
@@ -317,45 +320,38 @@ function EnrichmentWorkspace({ snapshotId }: { snapshotId: number }) {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {visible.map((lead) => {
-                  const missing = lead.confidence.missing_fields
+                  const sources = lead.field_sources
                   const scoreChange = lead.qualification.score !== null && lead.original.score !== null ? lead.qualification.score - lead.original.score : 0
                   return (
                     <tr key={lead.id} onClick={() => setOpenId(lead.id)} className={cn('cursor-pointer', selected.has(lead.id) ? 'bg-accent-soft/60' : 'hover:bg-slate-50')}>
                       <td className="px-3 py-2" onClick={(event) => event.stopPropagation()}>
                         <Checkbox label={`Select ${lead.company_name}`} checked={selected.has(lead.id)} onChange={() => toggle(lead.id)} />
                       </td>
-                      <td className="max-w-[220px] px-3 py-2">
+                      <td className="max-w-[190px] px-3 py-2">
                         <span className="block truncate font-medium text-ink">{lead.company_name}</span>
                         <span className="block truncate text-xs text-slate-500">{lead.industry ?? 'Unknown category'}</span>
                       </td>
-                      <td className="px-3 py-2">
-                        <ContactBadge status={lead.contact_status} />
+                      <td className="max-w-[200px] px-3 py-2">
+                        <FieldCell
+                          value={lead.email}
+                          source={sources.email}
+                          problem={lead.contact_status === 'invalid_email' ? 'invalid format' : undefined}
+                        />
                       </td>
-                      <td className="max-w-[240px] px-3 py-2">
-                        {lead.email ? (
-                          <span className="flex items-center gap-1.5">
-                            <span className="truncate text-slate-700">{lead.email}</span>
-                            {lead.field_sources.email && (
-                              <Badge tone="accent">{lead.field_sources.email === 'manual' ? 'Manual' : 'Enriched'}</Badge>
-                            )}
-                          </span>
-                        ) : (
-                          <span className="text-slate-400">Not available</span>
-                        )}
-                        {lead.owner_name && <span className="block truncate text-xs text-slate-500">{lead.owner_name}</span>}
+                      <td className="whitespace-nowrap px-3 py-2">
+                        <FieldCell value={lead.phone} source={sources.phone} />
                       </td>
-                      <td className="px-3 py-2">
-                        {missing.length === 0 ? (
-                          <span className="inline-flex items-center gap-1 text-xs text-emerald-700">
-                            <CheckCircle2 className="size-3.5" aria-hidden />
-                            Complete
-                          </span>
-                        ) : (
-                          <span className="text-xs text-slate-600" title={missing.join(', ')}>
-                            {missing.slice(0, 3).join(', ')}
-                            {missing.length > 3 && ` +${missing.length - 3}`}
-                          </span>
-                        )}
+                      <td className="hidden max-w-[150px] px-3 py-2 2xl:table-cell">
+                        <FieldCell value={lead.domain ?? lead.website} source={sources.website} />
+                      </td>
+                      <td className="max-w-[170px] px-3 py-2">
+                        <FieldCell value={lead.owner_name} source={sources.owner_name} />
+                      </td>
+                      <td className="tabular whitespace-nowrap px-3 py-2">
+                        <FieldCell value={lead.revenue_usd === null ? null : formatMoney(lead.revenue_usd)} source={sources.revenue_usd} />
+                      </td>
+                      <td className="tabular whitespace-nowrap px-3 py-2">
+                        <FieldCell value={lead.employee_count === null ? null : formatNumber(lead.employee_count)} source={sources.employee_count} />
                       </td>
                       <td className="px-3 py-2">
                         <div className="flex items-center gap-2">

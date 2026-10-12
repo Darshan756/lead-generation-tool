@@ -130,6 +130,7 @@ def test_data_quality_is_calculated_from_records(client, seeded):
         "website_missing": 1,
         "phone_missing": 2,
         "revenue_missing": 1,
+        "employees_missing": 2,
         "owner_missing": 3,
         "incomplete_key_info": 3,
         "needs_manual_review": 2,

@@ -49,6 +49,13 @@ def test_enrichment_keeps_the_original_and_shows_before_and_after(client, snapsh
     assert (result["email_ready_at_creation"], result["email_ready"]) == (1, 3)
     assert result["quality_at_creation"]["email_format_valid"] == 1
     assert result["quality"]["email_format_valid"] == 3
+    # Enrichment is about every key field, not only email.
+    before, after = result["quality_at_creation"], result["quality"]
+    assert (before["phone_missing"], after["phone_missing"]) == (2, 1)
+    assert (before["owner_missing"], after["owner_missing"]) == (3, 1)
+    assert (before["employees_missing"], after["employees_missing"]) == (2, 1)
+    assert (before["incomplete_key_info"], after["incomplete_key_info"]) == (3, 1)
+    assert result["incomplete_count"] == 1
     bravo = leads_by_name(result)["Bravo Labs"]
     assert bravo["original"] == {
         "contact_status": "needs_enrichment", "email": None, "score": 78, "confidence_percent": 50,

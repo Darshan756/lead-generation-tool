@@ -135,6 +135,7 @@ export interface DataQuality {
   website_missing: number
   phone_missing: number
   revenue_missing: number
+  employees_missing: number
   owner_missing: number
   incomplete_key_info: number
   needs_manual_review: number
@@ -159,6 +160,7 @@ export interface SnapshotSummary {
   email_ready_at_creation: number
   invalid_email: number
   needs_enrichment: number
+  incomplete_count: number
   enriched_lead_count: number
   draft_count: number
 }

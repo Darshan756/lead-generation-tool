@@ -177,6 +177,7 @@ class DataQuality(BaseModel):
     website_missing: int
     phone_missing: int
     revenue_missing: int
+    employees_missing: int
     owner_missing: int
     incomplete_key_info: int
     needs_manual_review: int
@@ -218,6 +219,8 @@ class SnapshotSummary(BaseModel):
     email_ready_at_creation: int
     invalid_email: int
     needs_enrichment: int
+    # Leads still missing at least one key field (not only email).
+    incomplete_count: int
     enriched_lead_count: int
     draft_count: int
 

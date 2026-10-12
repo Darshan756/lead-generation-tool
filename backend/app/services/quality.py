@@ -106,6 +106,7 @@ def summarize(records: list[dict[str, Any]], duplicates_merged: int = 0) -> dict
         "website_missing": sum(1 for r in records if not clean(r.get("website"))),
         "phone_missing": sum(1 for r in records if not clean(r.get("phone"))),
         "revenue_missing": sum(1 for r in records if r.get("revenue_usd") is None),
+        "employees_missing": sum(1 for r in records if r.get("employee_count") is None),
         "owner_missing": sum(1 for r in records if not clean(r.get("owner_name"))),
         "incomplete_key_info": sum(1 for c in confidences if c["missing_fields"]),
         "needs_manual_review": sum(
