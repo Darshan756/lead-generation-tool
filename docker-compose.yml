@@ -1,0 +1,21 @@
+# PostgreSQL for local development and tests.
+#   docker compose up -d
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: boosta
+      POSTGRES_PASSWORD: boosta
+      POSTGRES_DB: boosta
+    ports:
+      - "5432:5432"
+    volumes:
+      - boosta_pgdata:/var/lib/postgresql/data
+      - ./backend/scripts/create_test_db.sql:/docker-entrypoint-initdb.d/create_test_db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U boosta"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  boosta_pgdata:

@@ -1,0 +1,6 @@
+-r requirements.txt
+pytest>=8.0
+httpx>=0.27
+# Bundled PostgreSQL binaries, used only for local development and tests when
+# no PostgreSQL server (or Docker) is available. Not needed in production.
+pgserver>=0.1.4
