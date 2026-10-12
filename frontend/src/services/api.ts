@@ -36,7 +36,8 @@ async function send(path: string, init?: RequestInit): Promise<Response> {
   try {
     response = await fetch(`${BASE_URL}${path}`, {
       ...init,
-      headers: init?.body ? { 'Content-Type': 'application/json', ...init.headers } : init?.headers,
+      // JSON bodies are labelled; for FormData the browser sets the multipart boundary itself.
+      headers: typeof init?.body === 'string' ? { 'Content-Type': 'application/json', ...init.headers } : init?.headers,
     })
   } catch {
     throw new ApiError(0, 'Cannot reach the API. Check that the backend is running.')
@@ -61,6 +62,11 @@ export const put = <T>(path: string, body: unknown) =>
 export const patch = <T>(path: string, body: unknown) =>
   request<T>(path, { method: 'PATCH', body: JSON.stringify(body) })
 export const del = (path: string) => request<void>(path, { method: 'DELETE' })
+export const upload = <T>(path: string, file: File) => {
+  const form = new FormData()
+  form.append('file', file)
+  return request<T>(path, { method: 'POST', body: form })
+}
 
 /** Fetch a CSV and hand it to the browser as a file. Returns the filename. */
 export async function download(path: string, init?: RequestInit): Promise<string> {

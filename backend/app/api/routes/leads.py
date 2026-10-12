@@ -1,12 +1,12 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, Response
+from fastapi import APIRouter, Depends, File, Query, Response, UploadFile
 from sqlalchemy.orm import Session
 
 from app import schemas
 from app.db.session import get_db
 from app.errors import NotFoundError
-from app.services import csv_export, lead_service, scoring
+from app.services import csv_export, file_import, import_service, lead_service, scoring
 
 router = APIRouter(tags=["leads"])
 Db = Annotated[Session, Depends(get_db)]
@@ -41,6 +41,23 @@ def list_leads(query: Annotated[schemas.LeadQuery, Query()], db: Db):
 @router.get("/leads/facets", response_model=schemas.LeadFacets)
 def lead_facets(db: Db):
     return lead_service.facets(db)
+
+
+@router.post("/leads/import", response_model=schemas.ImportResult)
+def import_leads(db: Db, file: Annotated[UploadFile, File(description="Excel (.xlsx) or CSV file with a header row")]):
+    """Add leads from a spreadsheet. Rows that match an existing company
+    (same domain, or same name and state) are merged, not duplicated."""
+    # Read one byte past the limit so an oversized file is detected without loading it all.
+    content = file.file.read(file_import.MAX_FILE_BYTES + 1)
+    records, skipped = file_import.parse(file.filename or "", content)
+    stats = import_service.import_leads(db, records, source="file_import")
+    return {
+        "filename": file.filename or "upload",
+        "rows_read": len(records) + len(skipped),
+        "inserted": stats["inserted"],
+        "duplicates_merged": stats["duplicates_merged"],
+        "skipped": skipped,
+    }
 
 
 @router.post("/leads/export")

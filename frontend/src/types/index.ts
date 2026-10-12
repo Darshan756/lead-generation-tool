@@ -105,6 +105,14 @@ export interface LeadFacets {
   revenue_max: number | null
 }
 
+export interface ImportResult {
+  filename: string
+  rows_read: number
+  inserted: number
+  duplicates_merged: number
+  skipped: { row: number; reason: string }[]
+}
+
 export interface TargetProfileInput {
   industries: string[]
   states: string[]

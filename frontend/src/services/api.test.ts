@@ -1,4 +1,4 @@
-import { ApiError, errorMessage, get } from './api'
+import { ApiError, errorMessage, get, post, upload } from './api'
 
 describe('errorMessage', () => {
   it('passes through a plain detail string', () => {
@@ -36,5 +36,28 @@ describe('request', () => {
     const error = await get('/snapshots/9').catch((reason: unknown) => reason)
     expect(error).toBeInstanceOf(ApiError)
     expect((error as ApiError).message).toBe('Snapshot 9 does not exist.')
+  })
+})
+
+describe('upload', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('sends the file as multipart form data and lets the browser set the content type', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ inserted: 1 }), { status: 200 }))
+    vi.stubGlobal('fetch', fetchMock)
+    const file = new File(['a,b'], 'leads.csv')
+    await upload('/leads/import', file)
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit]
+    expect(url).toBe('/api/leads/import')
+    expect(init.method).toBe('POST')
+    expect((init.body as FormData).get('file')).toBe(file)
+    expect(init.headers).toBeUndefined()
+  })
+
+  it('still labels JSON bodies', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response('{}', { status: 200 }))
+    vi.stubGlobal('fetch', fetchMock)
+    await post('/snapshots', { name: 'x' })
+    expect((fetchMock.mock.calls[0] as [string, RequestInit])[1].headers).toEqual({ 'Content-Type': 'application/json' })
   })
 })

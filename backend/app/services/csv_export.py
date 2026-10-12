@@ -9,7 +9,7 @@ import re
 from datetime import date
 from typing import Any
 
-DATA_NOTE = "Synthetic demo data — not verified"
+DATA_NOTE = "Demo workspace data — not verified"
 
 LEAD_COLUMNS: list[tuple[str, str]] = [
     ("company_name", "Company"),

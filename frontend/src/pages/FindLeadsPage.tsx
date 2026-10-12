@@ -1,13 +1,13 @@
-import { Camera, Download, SearchX, Target, X } from 'lucide-react'
+import { Camera, Download, SearchX, Target, Upload, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CreateSnapshotDialog } from '../components/leads/CreateSnapshotDialog'
+import { ImportLeadsDialog } from '../components/leads/ImportLeadsDialog'
 import { DataQualitySummary } from '../components/leads/DataQualitySummary'
 import { LeadDrawer } from '../components/leads/LeadDrawer'
 import { LeadFiltersBar } from '../components/leads/LeadFiltersBar'
 import { LeadTable } from '../components/leads/LeadTable'
 import { TargetProfileDialog } from '../components/leads/TargetProfileDialog'
-import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { Pagination } from '../components/ui/Pagination'
 import { Card, EmptyState, ErrorState, LoadingState, PageHeader } from '../components/ui/States'
@@ -31,6 +31,7 @@ export function FindLeadsPage() {
   const [openLead, setOpenLead] = useState<Lead | null>(null)
   const [snapshotIds, setSnapshotIds] = useState<number[] | null>(null)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [importOpen, setImportOpen] = useState(false)
   const [exporting, setExporting] = useState(false)
 
   // Typing in the search box should not fire a request per keystroke.
@@ -100,9 +101,9 @@ export function FindLeadsPage() {
         description="Search one or more business categories, narrow the results, then save them as a snapshot to enrich and contact."
         actions={
           <>
-            <Badge tone="warning" title="Every company and contact in this workspace is fictional.">
-              Synthetic demo data
-            </Badge>
+            <Button icon={<Upload className="size-3.5" aria-hidden />} onClick={() => setImportOpen(true)}>
+              Import leads
+            </Button>
             <Button icon={<Target className="size-3.5" aria-hidden />} onClick={() => setProfileOpen(true)}>
               Target profile
             </Button>
@@ -247,6 +248,17 @@ export function FindLeadsPage() {
           setSelected(new Set())
           toast.success(`Saved “${snapshot.name}” with ${plural(snapshot.lead_count, 'lead')}. Next: enrich it.`)
           navigate(`/enrichment/${snapshot.id}`)
+        }}
+      />
+
+      <ImportLeadsDialog
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImported={() => {
+          // New companies can add categories and states and change every total.
+          leads.reload()
+          facets.reload()
+          quality.reload()
         }}
       />
 

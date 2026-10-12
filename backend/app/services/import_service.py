@@ -37,7 +37,7 @@ class RawLead(BaseModel):
         return clean(value)
 
 
-def import_leads(db: Session, raw_records: list[dict[str, Any]]) -> dict[str, int]:
+def import_leads(db: Session, raw_records: list[dict[str, Any]], source: str = "synthetic_demo") -> dict[str, int]:
     """Insert records, folding duplicates into the first record seen.
 
     Two records are the same company when they share a normalised domain (or,
@@ -52,7 +52,7 @@ def import_leads(db: Session, raw_records: list[dict[str, Any]]) -> dict[str, in
     for record, key in zip(records, keys):
         lead = existing.get(key)
         if lead is None:
-            lead = Lead(dedupe_key=key, domain=normalize_domain(record.website), **record.model_dump())
+            lead = Lead(dedupe_key=key, domain=normalize_domain(record.website), source=source, **record.model_dump())
             db.add(lead)
             existing[key] = lead
             inserted += 1

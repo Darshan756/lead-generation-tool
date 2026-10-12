@@ -153,7 +153,7 @@ def test_export_respects_selection_and_escapes_values(client, lead_ids):
     assert alpha["Qualification score"] == "100" and alpha["Priority"] == "high"
     assert alpha["Contact readiness"] == "Email present (format checked, not verified)"
     assert "target industry" in alpha["Positive signals"]
-    assert alpha["Data note"] == "Synthetic demo data — not verified"
+    assert alpha["Data note"] == "Demo workspace data — not verified"
     assert rows[0]["Email"] == "" and rows[0]["Qualification score"] == "0"
 
 

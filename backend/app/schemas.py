@@ -152,6 +152,19 @@ class LeadFacets(BaseModel):
     revenue_max: int | None
 
 
+class SkippedRow(BaseModel):
+    row: int
+    reason: str
+
+
+class ImportResult(BaseModel):
+    filename: str
+    rows_read: int
+    inserted: int
+    duplicates_merged: int
+    skipped: list[SkippedRow]
+
+
 class LeadExportRequest(BaseModel):
     lead_ids: list[int] = Field(min_length=1, max_length=5000)
 
