@@ -117,10 +117,10 @@ def test_delete_snapshot(client, snapshot):
 def test_snapshot_export(client, snapshot):
     response = client.get(f"/api/snapshots/{snapshot['id']}/export")
     assert response.status_code == 200
-    assert "demo-snapshot-california-software-october-2026-" in response.headers["content-disposition"]
+    assert "demo-lead-list-california-software-october-2026-" in response.headers["content-disposition"]
     rows = list(csv.DictReader(io.StringIO(response.text.lstrip("﻿"))))
     assert [r["Company"] for r in rows] == ["Bravo Labs", "Alpha Software", DELTA]
-    assert rows[0]["Snapshot"] == "California Software — October 2026"
+    assert rows[0]["Lead list"] == "California Software — October 2026"
     assert rows[0]["Contact readiness"] == "No email — needs enrichment"
     assert rows[0]["Recommended next action"] == "Enrich contact — strong fit"
     assert rows[1]["Qualification score"] == "100"

@@ -16,7 +16,7 @@ const NAV: NavItem[] = [
   { to: '/enrichment', label: 'Enrichment', step: 2, icon: <Sparkles className="size-4" aria-hidden /> },
   { to: '/outreach', label: 'Outreach', step: 3, icon: <Mail className="size-4" aria-hidden /> },
 ]
-const LIBRARY: NavItem[] = [{ to: '/snapshots', label: 'Snapshots', icon: <Layers className="size-4" aria-hidden /> }]
+const LIBRARY: NavItem[] = [{ to: '/lists', label: 'Lead Lists', icon: <Layers className="size-4" aria-hidden /> }]
 
 function NavList({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => void }) {
   return (

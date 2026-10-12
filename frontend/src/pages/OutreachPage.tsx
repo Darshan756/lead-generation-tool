@@ -80,9 +80,9 @@ export function OutreachPage() {
   const [params, setParams] = useSearchParams()
   const [tab, setTab] = useState<'compose' | 'drafts'>('compose')
 
-  // Loaded snapshots live in the URL, so a link from another page preselects one.
+  // Loaded lead lists live in the URL, so a link from another page preselects one.
   const loadedIds = useMemo(
-    () => [...new Set(params.getAll('snapshot').map(Number).filter((id) => Number.isInteger(id) && id > 0))],
+    () => [...new Set(params.getAll('list').map(Number).filter((id) => Number.isInteger(id) && id > 0))],
     [params],
   )
   const loadedKey = loadedIds.join(',')
@@ -116,7 +116,7 @@ export function OutreachPage() {
 
   const toggleSnapshot = (id: number) => {
     const next = loadedIds.includes(id) ? loadedIds.filter((value) => value !== id) : [...loadedIds, id]
-    setParams({ snapshot: next.map(String) }, { replace: true })
+    setParams({ list: next.map(String) }, { replace: true })
     setResult(null)
   }
   const toggleLead = (id: number) =>
@@ -187,7 +187,7 @@ export function OutreachPage() {
     <>
       <PageHeader
         title="Outreach"
-        description="Load a snapshot, pick the leads that have an email, and turn one template into a personalised draft for each. Nothing is sent from this app."
+        description="Load a lead list, pick the leads that have an email, and turn one template into a personalised draft for each. Nothing is sent from this app."
       />
 
       <div role="tablist" aria-label="Outreach" className="mb-4 flex gap-1 border-b border-slate-200">
@@ -213,22 +213,22 @@ export function OutreachPage() {
           {result && <ResultBanner result={result} onDismiss={() => setResult(null)} onView={() => setTab('drafts')} />}
 
           <Card className="px-4 py-3">
-            <StepTitle step={1}>Load snapshots</StepTitle>
+            <StepTitle step={1}>Load lead lists</StepTitle>
             {snapshots.error ? (
               <ErrorState message={snapshots.error} onRetry={snapshots.reload} />
             ) : !snapshots.data ? (
-              <LoadingState label="Loading snapshots…" />
+              <LoadingState label="Loading lead lists…" />
             ) : snapshots.data.length === 0 ? (
               <EmptyState
                 icon={<Layers className="size-5" />}
-                title="No snapshots yet"
+                title="No lead lists yet"
                 action={
                   <Button variant="primary" onClick={() => navigate('/leads')}>
                     Go to Find Leads
                   </Button>
                 }
               >
-                Outreach starts from a saved snapshot. Save one from Find Leads, then come back here.
+                Outreach starts from a saved lead list. Save one from Find Leads, then come back here.
               </EmptyState>
             ) : (
               <ul className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
@@ -307,7 +307,7 @@ export function OutreachPage() {
                         <th scope="col" className={TH}>Company</th>
                         <th scope="col" className={TH}>Send to</th>
                         <th scope="col" className={TH}>Contact</th>
-                        {loadedIds.length > 1 && <th scope="col" className={TH}>Snapshot</th>}
+                        {loadedIds.length > 1 && <th scope="col" className={TH}>Lead list</th>}
                         <th scope="col" className="px-3 py-2 text-right text-xs font-medium text-slate-500">Individual</th>
                       </tr>
                     </thead>
@@ -427,7 +427,7 @@ export function OutreachPage() {
             <LoadingState label="Loading drafts…" />
           ) : drafts.data.length === 0 ? (
             <EmptyState icon={<FileText className="size-5" />} title="No drafts yet" action={<Button onClick={() => setTab('compose')}>Compose drafts</Button>}>
-              Load a snapshot in Compose, select leads with an email, and create drafts. They will be saved here for
+              Load a lead list in Compose, select leads with an email, and create drafts. They will be saved here for
               editing.
             </EmptyState>
           ) : (
@@ -438,7 +438,7 @@ export function OutreachPage() {
                     <th scope="col" className={TH}>Company</th>
                     <th scope="col" className={TH}>To</th>
                     <th scope="col" className={TH}>Subject</th>
-                    <th scope="col" className={TH}>Snapshot</th>
+                    <th scope="col" className={TH}>Lead list</th>
                     <th scope="col" className={TH}>Last edited</th>
                   </tr>
                 </thead>
@@ -480,7 +480,7 @@ export function OutreachPage() {
         loading={deleting}
         onConfirm={confirmDelete}
         onClose={() => setToDelete(null)}
-        message={toDelete && <>The draft for {toDelete.company_name} will be permanently deleted. The lead stays in its snapshot.</>}
+        message={toDelete && <>The draft for {toDelete.company_name} will be permanently deleted. The lead stays in its list.</>}
       />
     </>
   )

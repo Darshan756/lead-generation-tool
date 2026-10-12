@@ -17,7 +17,7 @@ export default function App() {
             <Route path="/enrichment" element={<EnrichmentPage />} />
             <Route path="/enrichment/:snapshotId" element={<EnrichmentPage />} />
             <Route path="/outreach" element={<OutreachPage />} />
-            <Route path="/snapshots" element={<SnapshotsPage />} />
+            <Route path="/lists" element={<SnapshotsPage />} />
             <Route path="*" element={<Navigate to="/leads" replace />} />
           </Route>
         </Routes>

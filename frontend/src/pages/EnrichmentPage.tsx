@@ -24,29 +24,29 @@ type View = 'all' | 'incomplete' | 'complete' | 'enriched'
 
 const isIncomplete = (lead: SnapshotLead) => lead.confidence.missing_fields.length > 0
 
-/** Step 2 without a snapshot chosen: pick one. */
+/** Step 2 without a lead list chosen: pick one. */
 function SnapshotPicker() {
   const navigate = useNavigate()
   const snapshots = useAsync(() => snapshotService.list(), [])
   return (
     <>
-      <PageHeader title="Enrichment" description="Choose a snapshot to fill in whatever is missing: emails, phone numbers, contacts, revenue and company size." />
+      <PageHeader title="Enrichment" description="Choose a lead list to fill in whatever is missing: emails, phone numbers, contacts, revenue and company size." />
       <Card>
         {snapshots.error ? (
           <ErrorState message={snapshots.error} onRetry={snapshots.reload} />
         ) : !snapshots.data ? (
-          <LoadingState label="Loading snapshots…" />
+          <LoadingState label="Loading lead lists…" />
         ) : snapshots.data.length === 0 ? (
           <EmptyState
             icon={<Layers className="size-5" />}
-            title="No snapshots to enrich yet"
+            title="No lead lists to enrich yet"
             action={
               <Button variant="primary" onClick={() => navigate('/leads')}>
                 Go to Find Leads
               </Button>
             }
           >
-            Enrichment works on a saved snapshot. Save one from Find Leads first.
+            Enrichment works on a saved lead list. Save one from Find Leads first.
           </EmptyState>
         ) : (
           <ul className="divide-y divide-slate-100">
@@ -158,7 +158,7 @@ function EnrichmentWorkspace({ snapshotId }: { snapshotId: number }) {
       </Card>
     )
   }
-  if (!data) return <LoadingState label="Loading snapshot…" />
+  if (!data) return <LoadingState label="Loading lead list…" />
 
   const openLead = leads.find((lead) => lead.id === openId) ?? null
   const selectedVisible = visible.filter((lead) => selected.has(lead.id))
@@ -206,7 +206,7 @@ function EnrichmentWorkspace({ snapshotId }: { snapshotId: number }) {
         back={
           <Link to="/enrichment" className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-ink">
             <ArrowLeft className="size-3.5" aria-hidden />
-            All snapshots
+            All lists
           </Link>
         }
         title={data.name}
@@ -227,7 +227,7 @@ function EnrichmentWorkspace({ snapshotId }: { snapshotId: number }) {
               variant="primary"
               disabled={data.email_ready === 0}
               title={data.email_ready === 0 ? 'No lead has a usable email yet. Enrich first.' : undefined}
-              onClick={() => navigate(`/outreach?snapshot=${data.id}`)}
+              onClick={() => navigate(`/outreach?list=${data.id}`)}
             >
               Continue to outreach
               <ArrowRight className="size-3.5" aria-hidden />
@@ -281,10 +281,10 @@ function EnrichmentWorkspace({ snapshotId }: { snapshotId: number }) {
             action={view !== 'all' && <Button onClick={() => setView('all')}>Show all leads</Button>}
           >
             {view === 'incomplete'
-              ? 'Every lead in this snapshot has all key fields.'
+              ? 'Every lead in this list has all key fields.'
               : view === 'enriched'
                 ? 'Run enrichment, or edit a lead, and it will appear here.'
-                : 'Switch view to see the other leads in this snapshot.'}
+                : 'Switch view to see the other leads in this list.'}
           </EmptyState>
         ) : (
           <div className="overflow-x-auto">
@@ -417,10 +417,10 @@ export function EnrichmentPage() {
   if (!Number.isInteger(id) || id < 1) {
     return (
       <Card>
-        <ErrorState message="That snapshot link is not valid." />
+        <ErrorState message="That lead list link is not valid." />
       </Card>
     )
   }
-  // Keyed so switching snapshots starts with a clean selection and result.
+  // Keyed so switching lead lists starts with a clean selection and result.
   return <EnrichmentWorkspace key={id} snapshotId={id} />
 }

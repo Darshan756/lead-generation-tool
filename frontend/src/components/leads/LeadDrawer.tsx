@@ -9,7 +9,7 @@ import { ConfidenceCell, ContactBadge, PriorityBadge, ScoreBreakdown } from './i
 interface LeadDrawerProps {
   lead: EvaluatedLead | null
   onClose: () => void
-  /** Present for snapshot leads: which fields enrichment changed. */
+  /** Present for leads in a lead list: which fields enrichment changed. */
   fieldSources?: Record<string, FieldSource>
   footer?: ReactNode
   note?: ReactNode

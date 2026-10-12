@@ -126,14 +126,14 @@ def _snapshot_leads(db: Session, ids: list[int]) -> list[SnapshotLead]:
     found = {item.id: item for item in db.scalars(stmt)}
     missing = [i for i in ids if i not in found]
     if missing:
-        raise ValidationError(f"These snapshot leads do not exist: {missing[:10]}.")
+        raise ValidationError(f"These leads do not exist in any lead list: {missing[:10]}.")
     return [found[i] for i in ids]
 
 
 def preview(db: Session, snapshot_lead_id: int, subject: str, body: str) -> dict[str, Any]:
     item = db.get(SnapshotLead, snapshot_lead_id)
     if item is None:
-        raise NotFoundError(f"Snapshot lead {snapshot_lead_id} does not exist.")
+        raise NotFoundError(f"Lead {snapshot_lead_id} does not exist in any lead list.")
     rendered_subject, f1, u1 = render(subject, item.data)
     rendered_body, f2, u2 = render(body, item.data)
     return {
@@ -226,7 +226,7 @@ def list_drafts(db: Session, snapshot_id: int | None = None, ids: list[int] | No
     stmt = _draft_query().order_by(OutreachDraft.snapshot_id.desc(), OutreachDraft.id)
     if snapshot_id is not None:
         if db.get(Snapshot, snapshot_id) is None:
-            raise NotFoundError(f"Snapshot {snapshot_id} does not exist.")
+            raise NotFoundError(f"Lead list {snapshot_id} does not exist.")
         stmt = stmt.where(OutreachDraft.snapshot_id == snapshot_id)
     if ids:
         stmt = stmt.where(OutreachDraft.id.in_(ids))
@@ -256,7 +256,7 @@ def delete_draft(db: Session, draft_id: int) -> None:
 
 
 def drafts_csv(drafts: list[OutreachDraft]) -> str:
-    headers = ["Company", "Industry", "Contact", "To", "Subject", "Message", "Snapshot", "Status", "Data note"]
+    headers = ["Company", "Industry", "Contact", "To", "Subject", "Message", "Lead list", "Status", "Data note"]
     rows = []
     for draft in drafts:
         out = draft_out(draft)

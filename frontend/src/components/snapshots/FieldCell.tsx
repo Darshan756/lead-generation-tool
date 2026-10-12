@@ -17,7 +17,7 @@ const SOURCE_TITLE: Record<FieldSource, string> = {
   manual: 'Entered manually during enrichment.',
 }
 
-/** One enrichable field in the snapshot table: missing, present, or filled by enrichment. */
+/** One enrichable field in the lead list table: missing, present, or filled by enrichment. */
 export function FieldCell({ value, source, problem, className }: FieldCellProps) {
   if (value === null || value === '') {
     return <span className="rounded bg-amber-50 px-1.5 py-0.5 text-xs font-medium text-amber-800 ring-1 ring-inset ring-amber-200">Missing</span>

@@ -1,6 +1,6 @@
 # Lead Intelligence & Enrichment — Demo
 
-A prototype showing one improvement to a lead-generation workflow: **a saved snapshot that carries a list of leads from discovery, through enrichment, into outreach**, so nothing is re-typed between steps.
+A prototype showing one improvement to a lead-generation workflow: **a saved lead list that carries the same leads from discovery, through enrichment, into outreach**, so nothing is re-typed between steps.
 
 > **Work sample — evaluation only.** This repository is shared for review as part of a hiring process. It is not open source; see [LICENSE](LICENSE). All company and contact data is synthetic.
 
@@ -10,11 +10,11 @@ A prototype showing one improvement to a lead-generation workflow: **a saved sna
 
 A typical lead tool has three separate pages: find leads, enrich them, write outreach. Each page starts from scratch, and the email step expects the user to type recipient details by hand.
 
-This demo connects the three with a snapshot:
+This demo connects the three with a saved lead list:
 
-1. **Find Leads** — import companies from Excel or CSV, search one or several business categories, filter by revenue, priority, data confidence and contact readiness, then save the result as a named snapshot.
-2. **Enrichment** — open a snapshot, see what is missing field by field (email, phone, website, contact, revenue, company size), fill the gaps, and see what enrichment filled.
-3. **Outreach** — load one or more snapshots, see how many leads have a usable email (the only field outreach needs), select them individually or in bulk, and turn one template into a personalised draft per lead.
+1. **Find Leads** — import companies from Excel or CSV, search one or several business categories, filter by revenue, priority, data confidence and contact readiness, then save the result as a named lead list.
+2. **Enrichment** — open a lead list, see what is missing field by field (email, phone, website, contact, revenue, company size), fill the gaps, and see what enrichment filled.
+3. **Outreach** — load one or more lead lists, see how many leads have a usable email (the only field outreach needs), select them individually or in bulk, and turn one template into a personalised draft per lead.
 
 For every lead the app answers three questions: why it is a potential customer (score breakdown), why to prioritise it (High / Medium / Low), and what to do next (recommended next step).
 
@@ -28,10 +28,10 @@ For every lead the app answers three questions: why it is a potential customer (
 - **Data confidence**, kept separate from the score: how complete a record is, and which fields are missing.
 - **Deduplication** on import by normalised domain (or name and state when there is no website). The 128 raw records become 120 companies.
 - **Excel / CSV import** in Find Leads. Column headers are matched loosely, rows matching an existing company are merged, and rows with problems are skipped and listed with a reason. `sample-data/demo-import-leads.xlsx` is a ready-made file to try (12 new, 2 merged, 2 skipped).
-- **Snapshots** stored in PostgreSQL as a copy of the leads, the search criteria and the target profile. Later changes to the lead list do not alter a snapshot.
+- **Lead lists** stored in PostgreSQL as a copy of the selected leads, the search criteria and the target profile. Later changes to the companies in Find Leads do not alter a saved list. (In the code and API these are called snapshots.)
 - **Enrichment** that fills only missing fields, records the source of each change (simulated or manual), and keeps the originally captured values.
 - **Outreach drafts** with template variables, neutral fallbacks for missing values, a server-rendered preview, a per-lead report of what was skipped and why, editing, and a "open in mail app" link.
-- **CSV export** of selected leads, snapshots and drafts, with correct quoting and spreadsheet-formula neutralisation.
+- **CSV export** of selected leads, lead lists and drafts, with correct quoting and spreadsheet-formula neutralisation.
 - **Data-quality summary** calculated from the records.
 
 ## What is simulated or not implemented
@@ -40,7 +40,7 @@ For every lead the app answers three questions: why it is a potential customer (
 - **Enrichment is simulated.** It reads from a synthetic lookup table that covers about 70% of companies. No external provider is called.
 - **No email is sent.** Drafts are saved; sending happens in the user's own mail app.
 - **Nothing is verified.** Emails are checked for format only. The app says so wherever an email is shown.
-- **Enrichment stays in the snapshot.** It is not written back to the main lead list.
+- **Enrichment stays in the lead list.** It is not written back to the companies in Find Leads.
 - **Score filters run in application code**, not SQL, which is fine for this dataset but would need materialised scores at scale.
 - No authentication or multi-user support. Scoring weights are illustrative, not a validated sales model.
 
@@ -79,7 +79,7 @@ cd frontend && npm test       # 48 tests
 cd frontend && npm run lint && npm run build
 ```
 
-Backend tests build their schema by running the Alembic migrations and cover scoring rules, deduplication, file import, search and filter validation, snapshot immutability, enrichment, draft generation and skipping, template rendering, and the content of every CSV export.
+Backend tests build their schema by running the Alembic migrations and cover scoring rules, deduplication, file import, search and filter validation, lead-list immutability, enrichment, draft generation and skipping, template rendering, and the content of every CSV export.
 
 ## Structure
 
@@ -96,7 +96,7 @@ backend/
 sample-data/         the dataset as Excel, and a sample file for the import button
 frontend/
   src/
-    pages/           FindLeads, Enrichment, Outreach, Snapshots
+    pages/           FindLeads, Enrichment, Outreach, Snapshots (shown as "Lead Lists")
     components/      ui/, layout/, leads/, snapshots/, outreach/
     services/        typed API client — the only place that talks to the backend
     lib/             filter and formatting helpers

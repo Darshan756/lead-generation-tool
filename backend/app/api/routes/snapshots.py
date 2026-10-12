@@ -60,14 +60,14 @@ def export_snapshot(snapshot_id: int, db: Db):
             }
         )
     extra = [
-        ("snapshot_name", "Snapshot"),
-        ("snapshot_created", "Snapshot created"),
+        ("snapshot_name", "Lead list"),
+        ("snapshot_created", "List created"),
         ("enriched_fields", "Fields changed by enrichment"),
     ]
     return Response(
         content=csv_export.leads_csv(views, extra),
         media_type="text/csv; charset=utf-8",
         headers={
-            "Content-Disposition": f'attachment; filename="{csv_export.filename("snapshot", snapshot.name)}"'
+            "Content-Disposition": f'attachment; filename="{csv_export.filename("lead-list", snapshot.name)}"'
         },
     )

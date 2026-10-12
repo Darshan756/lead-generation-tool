@@ -143,7 +143,7 @@ export interface DataQuality {
   verified: number
 }
 
-/** Stored snapshot criteria: only the filters that were actually applied. */
+/** Stored lead list criteria: only the filters that were actually applied. */
 export type SnapshotCriteria = Partial<LeadFilters>
 
 export interface SnapshotSummary {

@@ -76,7 +76,7 @@ function EditLeadForm({ lead, onClose, onSaved }: { lead: SnapshotLead } & Omit<
       open
       onClose={onClose}
       title={`Edit ${lead.company_name}`}
-      description="Add what you found through your own research. Changes are saved to this snapshot only."
+      description="Add what you found through your own research. Changes are saved to this list only."
       footer={
         <>
           <Button onClick={onClose}>Cancel</Button>

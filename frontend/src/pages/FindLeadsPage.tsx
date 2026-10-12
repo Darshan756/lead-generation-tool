@@ -91,14 +91,14 @@ export function FindLeadsPage() {
   const hasFilters = activeFilterChips(filters).length > 0
   const total = data?.total ?? 0
   const selectedCount = selected.size
-  // With nothing selected, the snapshot covers everything that matches.
+  // With nothing selected, the lead list covers everything that matches.
   const snapshotAll = selectedCount === 0
 
   return (
     <>
       <PageHeader
         title="Find Leads"
-        description="Search one or more business categories, narrow the results, then save them as a snapshot to enrich and contact."
+        description="Search one or more business categories, narrow the results, then save them as a lead list to enrich and contact."
         actions={
           <>
             <Button icon={<Import className="size-3.5" aria-hidden />} onClick={() => setImportOpen(true)}>
@@ -113,7 +113,7 @@ export function FindLeadsPage() {
               disabled={!matchingIds?.length}
               onClick={() => setSnapshotIds(snapshotAll ? (matchingIds ?? []) : [...selected])}
             >
-              {snapshotAll ? `Save ${hasFilters ? 'results' : 'all'} as snapshot` : `Save ${selectedCount} as snapshot`}
+              {snapshotAll ? `Save ${hasFilters ? 'results' : 'all'} as list` : `Save ${selectedCount} as list`}
             </Button>
           </>
         }
@@ -168,7 +168,7 @@ export function FindLeadsPage() {
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <Button size="sm" variant="primary" icon={<Camera className="size-3.5" aria-hidden />} onClick={() => setSnapshotIds([...selected])}>
-                  Save as snapshot
+                  Save as list
                 </Button>
                 <Button size="sm" loading={exporting} icon={<Download className="size-3.5" aria-hidden />} onClick={() => exportLeads([...selected])}>
                   Export CSV

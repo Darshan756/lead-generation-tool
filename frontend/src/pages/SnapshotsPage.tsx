@@ -39,7 +39,7 @@ export function SnapshotsPage() {
       setToDelete(null)
       snapshots.reload()
     } catch (reason) {
-      toast.error(reason instanceof Error ? reason.message : 'The snapshot could not be deleted.')
+      toast.error(reason instanceof Error ? reason.message : 'The lead list could not be deleted.')
     } finally {
       setDeleting(false)
     }
@@ -48,7 +48,7 @@ export function SnapshotsPage() {
   return (
     <>
       <PageHeader
-        title="Snapshots"
+        title="Lead Lists"
         description="Saved lead lists. Each one is a point-in-time copy that you carry through enrichment and outreach."
         actions={
           <Button variant="primary" icon={<Search className="size-3.5" aria-hidden />} onClick={() => navigate('/leads')}>
@@ -60,25 +60,25 @@ export function SnapshotsPage() {
         {snapshots.error ? (
           <ErrorState message={snapshots.error} onRetry={snapshots.reload} />
         ) : !snapshots.data ? (
-          <LoadingState label="Loading snapshots…" />
+          <LoadingState label="Loading lead lists…" />
         ) : snapshots.data.length === 0 ? (
           <EmptyState
             icon={<Layers className="size-5" />}
-            title="No snapshots yet"
+            title="No lead lists yet"
             action={
               <Button variant="primary" onClick={() => navigate('/leads')}>
                 Go to Find Leads
               </Button>
             }
           >
-            In Find Leads, filter to the companies you want and choose “Save as snapshot”. The list will appear here.
+            In Find Leads, filter to the companies you want and choose “Save as list”. It will appear here.
           </EmptyState>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] text-[13px]">
               <thead className="border-b border-slate-200 bg-slate-50">
                 <tr>
-                  <th scope="col" className={TH}>Snapshot</th>
+                  <th scope="col" className={TH}>Lead list</th>
                   <th scope="col" className={TH}>Stage</th>
                   <th scope="col" className={TH}>Leads</th>
                   <th scope="col" className={TH}>Email ready</th>
@@ -123,9 +123,9 @@ export function SnapshotsPage() {
                               size="sm"
                               variant="primary"
                               disabled={snapshot.email_ready === 0}
-                              title={snapshot.email_ready === 0 ? 'No lead in this snapshot has a usable email yet.' : undefined}
+                              title={snapshot.email_ready === 0 ? 'No lead in this list has a usable email yet.' : undefined}
                               icon={<Mail className="size-3.5" aria-hidden />}
-                              onClick={() => navigate(`/outreach?snapshot=${snapshot.id}`)}
+                              onClick={() => navigate(`/outreach?list=${snapshot.id}`)}
                             >
                               Outreach
                             </Button>
@@ -138,7 +138,7 @@ export function SnapshotsPage() {
                                 label: 'Prepare outreach',
                                 icon: <Mail className="size-3.5" aria-hidden />,
                                 disabled: snapshot.email_ready === 0,
-                                onSelect: () => navigate(`/outreach?snapshot=${snapshot.id}`),
+                                onSelect: () => navigate(`/outreach?list=${snapshot.id}`),
                               },
                               { label: 'Export CSV', icon: <Download className="size-3.5" aria-hidden />, onSelect: () => exportCsv(snapshot) },
                               { label: 'Delete', icon: <Trash2 className="size-3.5" aria-hidden />, danger: true, onSelect: () => setToDelete(snapshot) },
@@ -157,8 +157,8 @@ export function SnapshotsPage() {
 
       <ConfirmDialog
         open={toDelete !== null}
-        title="Delete snapshot?"
-        confirmLabel="Delete snapshot"
+        title="Delete lead list?"
+        confirmLabel="Delete list"
         loading={deleting}
         onConfirm={confirmDelete}
         onClose={() => setToDelete(null)}

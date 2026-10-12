@@ -33,7 +33,7 @@ export function toSearchParams(filters: LeadFilters, sort: LeadSort, page: numbe
   return params
 }
 
-/** The filters that are actually applied, in the shape a snapshot stores. */
+/** The filters that are actually applied, in the shape a lead list stores. */
 export function toCriteria(filters: LeadFilters): SnapshotCriteria {
   const criteria: SnapshotCriteria = {}
   const q = filters.q.trim()
@@ -114,7 +114,7 @@ export function activeFilterChips(filters: LeadFilters): FilterChip[] {
   return chips
 }
 
-/** Human-readable lines describing stored snapshot criteria. */
+/** Human-readable lines describing stored lead list criteria. */
 export function describeCriteria(criteria: SnapshotCriteria): string[] {
   const lines: string[] = []
   if (criteria.q) lines.push(`Search: “${criteria.q}”`)
@@ -134,7 +134,7 @@ export function describeCriteria(criteria: SnapshotCriteria): string[] {
   return lines
 }
 
-/** A sensible default snapshot name built from the applied filters. */
+/** A sensible default lead list name built from the applied filters. */
 export function suggestSnapshotName(filters: LeadFilters, now = new Date()): string {
   const month = now.toLocaleString('en-US', { month: 'long', year: 'numeric' })
   const parts: string[] = []

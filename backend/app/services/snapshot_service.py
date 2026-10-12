@@ -20,7 +20,7 @@ def _load_options():
 def get(db: Session, snapshot_id: int) -> Snapshot:
     snapshot = db.scalar(select(Snapshot).where(Snapshot.id == snapshot_id).options(*_load_options()))
     if snapshot is None:
-        raise NotFoundError(f"Snapshot {snapshot_id} does not exist.")
+        raise NotFoundError(f"Lead list {snapshot_id} does not exist.")
     return snapshot
 
 
@@ -33,7 +33,7 @@ def create(db: Session, payload: SnapshotCreate) -> Snapshot:
     into a new snapshot, all in the request's transaction."""
     taken = db.scalar(select(Snapshot.id).where(func.lower(Snapshot.name) == payload.name.lower()))
     if taken:
-        raise ConflictError(f'A snapshot named "{payload.name}" already exists. Choose a different name.')
+        raise ConflictError(f'A lead list named "{payload.name}" already exists. Choose a different name.')
 
     leads = {lead.id: lead for lead in db.scalars(select(Lead).where(Lead.id.in_(payload.lead_ids)))}
     missing = [lead_id for lead_id in payload.lead_ids if lead_id not in leads]
@@ -56,7 +56,7 @@ def create(db: Session, payload: SnapshotCreate) -> Snapshot:
         db.flush()
     except IntegrityError:  # lost a race on the unique name index
         db.rollback()
-        raise ConflictError(f'A snapshot named "{payload.name}" already exists. Choose a different name.')
+        raise ConflictError(f'A lead list named "{payload.name}" already exists. Choose a different name.')
     return snapshot
 
 

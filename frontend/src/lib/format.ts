@@ -31,7 +31,7 @@ export const CONTACT_LABELS: Record<ContactStatus, { short: string; help: string
 export const STAGE_LABELS: Record<SnapshotStage, { label: string; help: string }> = {
   raw: { label: 'Captured', help: 'Saved from Find Leads. Not enriched yet.' },
   enriched: { label: 'Enriched', help: 'At least one lead has been enriched.' },
-  drafted: { label: 'Drafts ready', help: 'Outreach drafts exist for this snapshot.' },
+  drafted: { label: 'Drafts ready', help: 'Outreach drafts exist for this list.' },
 }
 
 export const FIELD_LABELS: Record<string, string> = {

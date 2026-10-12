@@ -2,7 +2,7 @@ import { ApiError, errorMessage, get, post, upload } from './api'
 
 describe('errorMessage', () => {
   it('passes through a plain detail string', () => {
-    expect(errorMessage(409, { detail: 'A snapshot named "X" already exists.' })).toBe('A snapshot named "X" already exists.')
+    expect(errorMessage(409, { detail: 'A lead list named "X" already exists.' })).toBe('A lead list named "X" already exists.')
   })
 
   it('flattens validation errors into one readable sentence', () => {
@@ -31,11 +31,11 @@ describe('request', () => {
   })
 
   it('throws an ApiError carrying the server message', async () => {
-    const response = new Response(JSON.stringify({ detail: 'Snapshot 9 does not exist.' }), { status: 404 })
+    const response = new Response(JSON.stringify({ detail: 'Lead list 9 does not exist.' }), { status: 404 })
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(response))
     const error = await get('/snapshots/9').catch((reason: unknown) => reason)
     expect(error).toBeInstanceOf(ApiError)
-    expect((error as ApiError).message).toBe('Snapshot 9 does not exist.')
+    expect((error as ApiError).message).toBe('Lead list 9 does not exist.')
   })
 })
 

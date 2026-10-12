@@ -33,13 +33,13 @@ function CreateSnapshotForm({ open, leadIds, filters, allMatching, onClose, onCr
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
-    if (!name.trim()) return setError('Give the snapshot a name.')
+    if (!name.trim()) return setError('Give the lead list a name.')
     setSaving(true)
     setError(null)
     try {
       onCreated(await snapshotService.create({ name: name.trim(), description: description.trim(), lead_ids: leadIds, criteria }))
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'The snapshot could not be saved.')
+      setError(reason instanceof Error ? reason.message : 'The lead list could not be saved.')
     } finally {
       setSaving(false)
     }
@@ -49,13 +49,13 @@ function CreateSnapshotForm({ open, leadIds, filters, allMatching, onClose, onCr
     <Dialog
       open={open}
       onClose={onClose}
-      title="Save snapshot"
+      title="Save lead list"
       description={`${plural(leadIds.length, 'lead')} ${allMatching ? 'matching your current filters' : 'you selected'}`}
       footer={
         <>
           <Button onClick={onClose}>Cancel</Button>
           <Button variant="primary" type="submit" form="create-snapshot" loading={saving}>
-            Save snapshot
+            Save list
           </Button>
         </>
       }
@@ -86,7 +86,7 @@ function CreateSnapshotForm({ open, leadIds, filters, allMatching, onClose, onCr
           )}
         </div>
         <p className="rounded-md bg-slate-50 px-3 py-2.5 text-xs leading-relaxed text-slate-600">
-          A snapshot is a copy of these leads as they are right now. It carries through enrichment and outreach, and
+          A lead list is a copy of these leads as they are right now. It carries through enrichment and outreach, and
           later changes to the lead list will not alter it. Leads without an email are included and flagged for
           enrichment.
         </p>

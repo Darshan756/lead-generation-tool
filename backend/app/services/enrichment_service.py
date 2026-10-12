@@ -58,7 +58,7 @@ def _select(snapshot: Snapshot, ids: list[int] | None) -> list[SnapshotLead]:
     by_id = {item.id: item for item in snapshot.leads}
     unknown = [i for i in ids if i not in by_id]
     if unknown:
-        raise ValidationError(f"These leads are not part of this snapshot: {unknown[:10]}.")
+        raise ValidationError(f"These leads are not part of this lead list: {unknown[:10]}.")
     return [by_id[i] for i in dict.fromkeys(ids)]
 
 
@@ -122,7 +122,7 @@ def update_lead(db: Session, snapshot: Snapshot, snapshot_lead_id: int, payload:
     """Manual enrichment: apply only the fields the client sent."""
     item = next((i for i in snapshot.leads if i.id == snapshot_lead_id), None)
     if item is None:
-        raise NotFoundError(f"Lead {snapshot_lead_id} is not part of snapshot {snapshot.id}.")
+        raise NotFoundError(f"Lead {snapshot_lead_id} is not part of lead list {snapshot.id}.")
     changes = payload.model_dump(exclude_unset=True)
     if not changes:
         raise ValidationError("No fields to update.")

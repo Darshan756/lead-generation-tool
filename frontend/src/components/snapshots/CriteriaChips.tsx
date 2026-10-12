@@ -1,7 +1,7 @@
 import { describeCriteria } from '../../lib/filters'
 import type { SnapshotCriteria } from '../../types'
 
-/** The search criteria a snapshot was captured with. */
+/** The search criteria a lead list was captured with. */
 export function CriteriaChips({ criteria }: { criteria: SnapshotCriteria }) {
   const lines = describeCriteria(criteria)
   if (!lines.length) return <span className="text-xs text-slate-500">No filters applied</span>
