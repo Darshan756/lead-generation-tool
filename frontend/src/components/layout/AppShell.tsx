@@ -6,15 +6,14 @@ import { cn } from '../../lib/cn'
 interface NavItem {
   to: string
   label: string
-  step?: number
   icon: ReactNode
 }
 
 // The first three items are the pipeline, in the order a user works through it.
 const NAV: NavItem[] = [
-  { to: '/leads', label: 'Find Leads', step: 1, icon: <Search className="size-4" aria-hidden /> },
-  { to: '/enrichment', label: 'Enrichment', step: 2, icon: <Sparkles className="size-4" aria-hidden /> },
-  { to: '/outreach', label: 'Outreach', step: 3, icon: <Mail className="size-4" aria-hidden /> },
+  { to: '/leads', label: 'Find Leads', icon: <Search className="size-4" aria-hidden /> },
+  { to: '/enrichment', label: 'Enrichment', icon: <Sparkles className="size-4" aria-hidden /> },
+  { to: '/outreach', label: 'Outreach', icon: <Mail className="size-4" aria-hidden /> },
 ]
 const LIBRARY: NavItem[] = [{ to: '/lists', label: 'Lead Lists', icon: <Layers className="size-4" aria-hidden /> }]
 
@@ -34,8 +33,7 @@ function NavList({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => v
             }
           >
             {item.icon}
-            <span className="flex-1">{item.label}</span>
-            {item.step && <span className="tabular text-[11px] text-slate-500">{item.step}</span>}
+            <span>{item.label}</span>
           </NavLink>
         </li>
       ))}

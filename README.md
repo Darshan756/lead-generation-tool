@@ -58,7 +58,7 @@ SaaSquatch already finds, enriches and contacts leads on three separate pages. R
 ### UX choices
 
 - **One primary action per page**, in the same place: save a list, enrich, create drafts. Secondary actions sit in row menus.
-- **The sidebar is the workflow**, numbered 1–3, and each step ends with a button to the next.
+- **The sidebar is the workflow**, listed in the order you work through it, and each step ends with a button to the next.
 - **Status is always written out** ("Needs email", "Missing", "High") and never shown by colour alone.
 - **Every bulk action reports its outcome**: how many were processed, how many were skipped, and why.
 - **Nothing is hidden behind a score**: clicking a lead shows each signal, the points it earned, and the recommended next step.
