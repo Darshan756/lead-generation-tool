@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app import schemas
 from app.db.session import get_db
-from app.services import csv_export, snapshot_service
+from app.services import csv_export, enrichment_service, snapshot_service
 
 router = APIRouter(prefix="/snapshots", tags=["snapshots"])
 Db = Annotated[Session, Depends(get_db)]
@@ -30,6 +30,20 @@ def get_snapshot(snapshot_id: int, db: Db):
 @router.delete("/{snapshot_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_snapshot(snapshot_id: int, db: Db):
     snapshot_service.delete(db, snapshot_id)
+
+
+@router.post("/{snapshot_id}/enrich", response_model=schemas.EnrichResult)
+def enrich_snapshot(snapshot_id: int, db: Db, payload: schemas.EnrichRequest | None = None):
+    snapshot = snapshot_service.get(db, snapshot_id)
+    result = enrichment_service.enrich(db, snapshot, payload.snapshot_lead_ids if payload else None)
+    return {**result, "snapshot": snapshot_service.detail(snapshot)}
+
+
+@router.patch("/{snapshot_id}/leads/{snapshot_lead_id}", response_model=schemas.SnapshotLeadOut)
+def update_snapshot_lead(snapshot_id: int, snapshot_lead_id: int, payload: schemas.SnapshotLeadUpdate, db: Db):
+    snapshot = snapshot_service.get(db, snapshot_id)
+    item = enrichment_service.update_lead(db, snapshot, snapshot_lead_id, payload)
+    return snapshot_service.lead_out(item, snapshot)
 
 
 @router.get("/{snapshot_id}/export")
