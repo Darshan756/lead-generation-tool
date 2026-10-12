@@ -99,6 +99,24 @@ This prototype runs locally and is **not deployed**. The intended setup on AWS:
 - **Database**: Amazon RDS for PostgreSQL.
 - **Deploy**: GitHub Actions runs both test suites, builds the image, runs `alembic upgrade head`, then releases.
 
+### Maintenance
+
+What is already in place to keep the project maintainable:
+
+- **Tests run against a real PostgreSQL** and build the schema from the migrations, so a model change without a migration fails the suite.
+- **Schema changes go through Alembic**, one reviewed migration file per change, applied with a single command on deploy.
+- **Business rules live in one place each**: scoring weights and thresholds in `services/scoring.py`, template variables in `services/outreach_service.py`, import column names in `services/file_import.py`. Changing a rule does not mean hunting through the UI.
+- **Configuration comes from environment variables** (`DATABASE_URL`, `CORS_ORIGINS`), so the same build runs locally and in the cloud.
+
+What I would add before running it in production (none of this is implemented):
+
+- **CI on every pull request**: both test suites, lint and type checks must pass before merge.
+- **Monitoring**: structured request logs and error tracking, with an alert on API error rate and slow queries.
+- **Backups**: daily automated RDS snapshots with point-in-time recovery, and a tested restore.
+- **Releases**: deploy to a staging copy first, then production, with the previous container image kept for one-step rollback.
+- **Dependency updates**: automated weekly update pull requests, merged when the tests pass.
+- **Authentication and per-user data** before any real customer data is stored.
+
 ## Run it
 
 Requirements: Python 3.12+, Node 20+, and PostgreSQL (Docker, or the bundled dev server below).
