@@ -109,7 +109,7 @@ function ImportLeadsForm({ onClose, onImported }: ImportLeadsDialogProps) {
       open
       onClose={onClose}
       title="Import leads"
-      description="Add companies from a spreadsheet. This stands in for the scraping step."
+      description="Add companies from a spreadsheet. They are saved to the lead database and become searchable."
       footer={
         <>
           <Button onClick={onClose}>Cancel</Button>
